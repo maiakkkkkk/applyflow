@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ApplicationCard } from '../features/applications/components/ApplicationCard'
 import { ApplicationsBoard } from '../features/applications/components/ApplicationsBoard'
 import { ApplicationForm } from '../features/applications/components/ApplicationForm'
@@ -6,11 +6,7 @@ import {
   ApplicationsFilters,
   type ApplicationFilters,
 } from '../features/applications/components/ApplicationsFilters'
-import { mockApplications } from '../features/applications/data/mockApplications'
-import {
-  loadApplications,
-  saveApplications,
-} from '../features/applications/storage/applicationsStorage'
+import { useApplications } from '../features/applications/context/ApplicationsContext'
 import type {
   Application,
   ApplicationStatus,
@@ -26,18 +22,18 @@ const initialFilters: ApplicationFilters = {
 }
 
 export function ApplicationsPage() {
-  const [applications, setApplications] = useState<Application[]>(() => [
-    ...(loadApplications() ?? mockApplications),
-  ])
+  const {
+    applications,
+    createApplication,
+    updateApplication,
+    deleteApplication,
+    changeApplicationStatus,
+  } = useApplications()
   const [filters, setFilters] = useState<ApplicationFilters>(initialFilters)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingApplication, setEditingApplication] =
     useState<Application | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('list')
-
-  useEffect(() => {
-    saveApplications(applications)
-  }, [applications])
 
   const normalizedSearch = filters.search.trim().toLocaleLowerCase()
   const filteredApplications = applications.filter((application) => {
@@ -79,9 +75,7 @@ export function ApplicationsPage() {
 
     if (!shouldDelete) return
 
-    setApplications((current) =>
-      current.filter((item) => item.id !== application.id),
-    )
+    deleteApplication(application.id)
 
     if (editingApplication?.id === application.id) closeForm()
   }
@@ -96,15 +90,7 @@ export function ApplicationsPage() {
     application: Application,
     status: ApplicationStatus,
   ) {
-    if (application.status === status) return
-
-    setApplications((current) =>
-      current.map((item) =>
-        item.id === application.id
-          ? { ...item, status, updatedAt: new Date().toISOString() }
-          : item,
-      ),
-    )
+    changeApplicationStatus(application.id, status)
   }
 
   return (
@@ -141,13 +127,8 @@ export function ApplicationsPage() {
             key={editingApplication?.id ?? 'new-application'}
             application={editingApplication ?? undefined}
             onSubmit={(application) => {
-              setApplications((current) =>
-                editingApplication
-                  ? current.map((item) =>
-                      item.id === application.id ? application : item,
-                    )
-                  : [...current, application],
-              )
+              if (editingApplication) updateApplication(application)
+              else createApplication(application)
               closeForm()
             }}
             onCancel={closeForm}
