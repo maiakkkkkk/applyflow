@@ -110,9 +110,6 @@ export function ApplicationsPage() {
   return (
     <main className="applications-page">
       <header className="page-header">
-        <a className="brand" href="/" aria-label="ApplyFlow home">
-          ApplyFlow
-        </a>
         <div className="page-heading-row">
           <div className="page-heading">
             <p className="eyebrow">Job Application Tracker</p>
