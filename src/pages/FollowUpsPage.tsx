@@ -46,7 +46,7 @@ function hasScheduledFollowUp(
 }
 
 export function FollowUpsPage() {
-  const { applications, updateApplication } = useApplications()
+  const { applications, updateApplication, isLoading, error } = useApplications()
   const today = getLocalDateKey()
   const scheduledApplications = applications
     .filter(hasScheduledFollowUp)
@@ -72,7 +72,7 @@ export function FollowUpsPage() {
   function completeFollowUp(application: Application) {
     const updatedApplication = { ...application }
     delete updatedApplication.nextActionAt
-    updateApplication(updatedApplication)
+    void updateApplication(updatedApplication).catch(() => undefined)
   }
 
   function rescheduleFollowUp(
@@ -80,7 +80,7 @@ export function FollowUpsPage() {
     nextActionAt: string,
   ) {
     if (!isValidDateOnly(nextActionAt)) return
-    updateApplication({ ...application, nextActionAt })
+    void updateApplication({ ...application, nextActionAt }).catch(() => undefined)
   }
 
   return (
@@ -93,14 +93,26 @@ export function FollowUpsPage() {
         </p>
       </header>
 
-      {scheduledApplications.length === 0 && (
+      {error && (
+        <p className="remote-error" role="alert">
+          {error}
+        </p>
+      )}
+
+      {isLoading && (
+        <div className="data-loading" aria-live="polite">
+          Loading follow-ups…
+        </div>
+      )}
+
+      {!isLoading && scheduledApplications.length === 0 && (
         <div className="follow-ups-empty">
           <h2>No follow-ups scheduled</h2>
           <p>Add a next action date to an active application to see it here.</p>
         </div>
       )}
 
-      <div className="follow-up-groups">
+      {!isLoading && <div className="follow-up-groups">
         {groups.map((group) => (
           <section
             className="follow-up-group"
@@ -130,7 +142,7 @@ export function FollowUpsPage() {
             )}
           </section>
         ))}
-      </div>
+      </div>}
     </main>
   )
 }
