@@ -28,6 +28,9 @@ export function ApplicationsPage() {
     updateApplication,
     deleteApplication,
     changeApplicationStatus,
+    isLoading,
+    error,
+    reloadApplications,
   } = useApplications()
   const [filters, setFilters] = useState<ApplicationFilters>(initialFilters)
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -68,14 +71,18 @@ export function ApplicationsPage() {
     setEditingApplication(null)
   }
 
-  function handleDelete(application: Application) {
+  async function handleDelete(application: Application) {
     const shouldDelete = window.confirm(
       `Delete the application for ${application.position} at ${application.company}?`,
     )
 
     if (!shouldDelete) return
 
-    deleteApplication(application.id)
+    try {
+      await deleteApplication(application.id)
+    } catch {
+      return
+    }
 
     if (editingApplication?.id === application.id) closeForm()
   }
@@ -90,7 +97,7 @@ export function ApplicationsPage() {
     application: Application,
     status: ApplicationStatus,
   ) {
-    changeApplicationStatus(application.id, status)
+    void changeApplicationStatus(application.id, status).catch(() => undefined)
   }
 
   return (
@@ -126,9 +133,9 @@ export function ApplicationsPage() {
           <ApplicationForm
             key={editingApplication?.id ?? 'new-application'}
             application={editingApplication ?? undefined}
-            onSubmit={(application) => {
-              if (editingApplication) updateApplication(application)
-              else createApplication(application)
+            onSubmit={async (application) => {
+              if (editingApplication) await updateApplication(application)
+              else await createApplication(application)
               closeForm()
             }}
             onCancel={closeForm}
@@ -141,6 +148,18 @@ export function ApplicationsPage() {
         onChange={setFilters}
         onClear={() => setFilters(initialFilters)}
       />
+
+      {error && (
+        <div className="remote-error" role="alert">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => void reloadApplications().catch(() => undefined)}
+          >
+            Try again
+          </button>
+        </div>
+      )}
 
       <div className="results-toolbar">
         <p className="result-count" aria-live="polite">
@@ -164,7 +183,11 @@ export function ApplicationsPage() {
         </div>
       </div>
 
-      {filteredApplications.length > 0 ? (
+      {isLoading ? (
+        <div className="data-loading" aria-live="polite">
+          Loading applications…
+        </div>
+      ) : filteredApplications.length > 0 ? (
         viewMode === 'list' ? (
           <section className="applications-grid" aria-label="Job applications">
             {filteredApplications.map((application) => (

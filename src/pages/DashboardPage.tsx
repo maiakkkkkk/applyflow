@@ -19,7 +19,7 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
 })
 
 export function DashboardPage() {
-  const { applications } = useApplications()
+  const { applications, isLoading, error } = useApplications()
   const statusCounts = Object.fromEntries(
     statuses.map(({ status }) => [
       status,
@@ -54,7 +54,14 @@ export function DashboardPage() {
         </p>
       </header>
 
-      <section className="metrics-grid" aria-label="Application summary">
+      {error && <p className="remote-error" role="alert">{error}</p>}
+      {isLoading && (
+        <div className="data-loading" aria-live="polite">
+          Loading dashboard…
+        </div>
+      )}
+
+      {!isLoading && <><section className="metrics-grid" aria-label="Application summary">
         {metrics.map((metric) => (
           <article className="metric-card" key={metric.label}>
             <p>{metric.label}</p>
@@ -120,7 +127,7 @@ export function DashboardPage() {
             <p className="dashboard-empty">No applications to display yet.</p>
           )}
         </section>
-      </div>
+      </div></>}
     </main>
   )
 }

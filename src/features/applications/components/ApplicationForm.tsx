@@ -9,7 +9,7 @@ import type {
 
 interface ApplicationFormProps {
   application?: Application
-  onSubmit: (application: Application) => void
+  onSubmit: (application: Application) => Promise<void>
   onCancel: () => void
 }
 
@@ -64,6 +64,7 @@ export function ApplicationForm({
     getInitialValues(applicationToEdit),
   )
   const [errors, setErrors] = useState<FormErrors>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function updateValue<Field extends keyof FormValues>(
     field: Field,
@@ -76,8 +77,9 @@ export function ApplicationForm({
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isSubmitting) return
 
     const nextErrors: FormErrors = {}
     if (!values.company.trim()) nextErrors.company = 'Company is required.'
@@ -123,9 +125,16 @@ export function ApplicationForm({
     if (values.notes.trim()) application.notes = values.notes.trim()
     else delete application.notes
 
-    onSubmit(application)
-    setValues(getInitialValues())
-    setErrors({})
+    setIsSubmitting(true)
+    try {
+      await onSubmit(application)
+      setValues(getInitialValues())
+      setErrors({})
+    } catch {
+      // The shared applications context exposes the remote error to the page.
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -332,11 +341,20 @@ export function ApplicationForm({
         </div>
 
         <div className="form-actions form-field--full">
-          <button className="secondary-button" type="button" onClick={onCancel}>
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
             Cancel
           </button>
-          <button className="primary-button" type="submit">
-            {isEditing ? 'Save changes' : 'Save application'}
+          <button className="primary-button" type="submit" disabled={isSubmitting}>
+            {isSubmitting
+              ? 'Saving…'
+              : isEditing
+                ? 'Save changes'
+                : 'Save application'}
           </button>
         </div>
       </form>

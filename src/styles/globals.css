@@ -527,6 +527,39 @@ h1 {
   font-weight: 600;
 }
 
+.remote-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  color: #b42318;
+  background: #fef3f2;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.remote-error button {
+  flex: 0 0 auto;
+  padding: 0.25rem 0.5rem;
+  color: #b42318;
+  background: #ffffff;
+  border: 1px solid #fecdca;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.data-loading {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: #667085;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 0.75rem;
+}
+
 .results-toolbar {
   display: flex;
   align-items: center;
