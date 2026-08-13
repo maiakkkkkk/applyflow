@@ -7,6 +7,8 @@ import type {
 
 interface ApplicationCardProps {
   application: Application
+  onEdit: (application: Application) => void
+  onDelete: (application: Application) => void
 }
 
 const statusLabels: Record<ApplicationStatus, string> = {
@@ -33,7 +35,11 @@ const workModeLabels: Record<WorkMode, string> = {
   onsite: 'On-site',
 }
 
-export function ApplicationCard({ application }: ApplicationCardProps) {
+export function ApplicationCard({
+  application,
+  onEdit,
+  onDelete,
+}: ApplicationCardProps) {
   const { company, position, source, status, technologies, workMode } =
     application
 
@@ -69,6 +75,19 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
           ))}
         </ul>
       )}
+
+      <div className="application-card__actions">
+        <button type="button" onClick={() => onEdit(application)}>
+          Edit
+        </button>
+        <button
+          className="card-action--delete"
+          type="button"
+          onClick={() => onDelete(application)}
+        >
+          Delete
+        </button>
+      </div>
     </article>
   )
 }
