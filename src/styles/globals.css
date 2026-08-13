@@ -20,6 +20,21 @@ body {
   min-height: 100vh;
 }
 
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  width: min(1120px, calc(100% - 3rem));
+  margin: 0 auto;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e4e7ec;
+}
+
 button,
 input,
 textarea,
@@ -39,12 +54,61 @@ select {
 }
 
 .brand {
-  display: inline-block;
-  margin-bottom: 3.5rem;
+  flex: 0 0 auto;
   color: #175cd3;
   font-size: 1.125rem;
   font-weight: 750;
   letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.primary-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.navigation-link {
+  padding: 0.5rem 0.75rem;
+  color: #475467;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.navigation-link:hover {
+  color: #182230;
+  background: #f2f4f7;
+}
+
+.navigation-link--active {
+  color: #175cd3;
+  background: #eff8ff;
+}
+
+.navigation-link:focus-visible {
+  outline: 3px solid rgb(23 92 211 / 20%);
+  outline-offset: 1px;
+}
+
+.placeholder-page {
+  width: min(1120px, 100%);
+  min-height: calc(100vh - 73px);
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.not-found-page {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.page-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 1.5rem;
   text-decoration: none;
 }
 
@@ -652,12 +716,25 @@ h1 {
 }
 
 @media (max-width: 700px) {
-  .applications-page {
-    padding: 1.5rem 1rem 3rem;
+  .app-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: calc(100% - 2rem);
   }
 
-  .brand {
-    margin-bottom: 2.5rem;
+  .primary-navigation {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .navigation-link {
+    flex: 1 0 auto;
+    text-align: center;
+  }
+
+  .applications-page {
+    padding: 1.5rem 1rem 3rem;
   }
 
   .page-heading-row {
