@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ApplicationCard } from '../features/applications/components/ApplicationCard'
+import { ApplicationsBoard } from '../features/applications/components/ApplicationsBoard'
 import { ApplicationForm } from '../features/applications/components/ApplicationForm'
 import {
   ApplicationsFilters,
@@ -10,7 +11,12 @@ import {
   loadApplications,
   saveApplications,
 } from '../features/applications/storage/applicationsStorage'
-import type { Application } from '../features/applications/types'
+import type {
+  Application,
+  ApplicationStatus,
+} from '../features/applications/types'
+
+type ViewMode = 'list' | 'board'
 
 const initialFilters: ApplicationFilters = {
   search: '',
@@ -27,6 +33,7 @@ export function ApplicationsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingApplication, setEditingApplication] =
     useState<Application | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('list')
 
   useEffect(() => {
     saveApplications(applications)
@@ -77,6 +84,27 @@ export function ApplicationsPage() {
     )
 
     if (editingApplication?.id === application.id) closeForm()
+  }
+
+  function handleEdit(application: Application) {
+    setEditingApplication(application)
+    setIsFormOpen(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handleStatusChange(
+    application: Application,
+    status: ApplicationStatus,
+  ) {
+    if (application.status === status) return
+
+    setApplications((current) =>
+      current.map((item) =>
+        item.id === application.id
+          ? { ...item, status, updatedAt: new Date().toISOString() }
+          : item,
+      ),
+    )
   }
 
   return (
@@ -136,25 +164,48 @@ export function ApplicationsPage() {
         onClear={() => setFilters(initialFilters)}
       />
 
-      <p className="result-count" aria-live="polite">
-        {resultLabel}
-      </p>
+      <div className="results-toolbar">
+        <p className="result-count" aria-live="polite">
+          {resultLabel}
+        </p>
+        <div className="view-toggle" aria-label="Application view">
+          <button
+            type="button"
+            aria-pressed={viewMode === 'list'}
+            onClick={() => setViewMode('list')}
+          >
+            List
+          </button>
+          <button
+            type="button"
+            aria-pressed={viewMode === 'board'}
+            onClick={() => setViewMode('board')}
+          >
+            Board
+          </button>
+        </div>
+      </div>
 
       {filteredApplications.length > 0 ? (
-        <section className="applications-grid" aria-label="Job applications">
-          {filteredApplications.map((application) => (
-            <ApplicationCard
-              key={application.id}
-              application={application}
-              onEdit={(selectedApplication) => {
-                setEditingApplication(selectedApplication)
-                setIsFormOpen(true)
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-              }}
-              onDelete={handleDelete}
-            />
-          ))}
-        </section>
+        viewMode === 'list' ? (
+          <section className="applications-grid" aria-label="Job applications">
+            {filteredApplications.map((application) => (
+              <ApplicationCard
+                key={application.id}
+                application={application}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </section>
+        ) : (
+          <ApplicationsBoard
+            applications={filteredApplications}
+            onStatusChange={handleStatusChange}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )
       ) : (
         <div className="empty-state">
           <h2>No applications found</h2>
