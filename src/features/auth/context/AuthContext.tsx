@@ -10,6 +10,7 @@ import {
 } from 'react'
 import type {
   AuthResponse,
+  OAuthResponse,
   AuthTokenResponsePassword,
   Session,
   User,
@@ -25,6 +26,7 @@ interface AuthContextValue {
     email: string,
     password: string,
   ) => Promise<AuthTokenResponsePassword>
+  signInWithGoogle: () => Promise<OAuthResponse>
   signOut: () => Promise<void>
 }
 
@@ -73,6 +75,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return supabase.auth.signInWithPassword({ email, password })
   }, [])
 
+  const signInWithGoogle = useCallback(() => {
+    return supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      },
+    })
+  }, [])
+
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
@@ -85,9 +96,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading,
       signUp,
       signIn,
+      signInWithGoogle,
       signOut,
     }),
-    [session, isLoading, signUp, signIn, signOut],
+    [session, isLoading, signUp, signIn, signInWithGoogle, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
