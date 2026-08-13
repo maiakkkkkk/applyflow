@@ -25,6 +25,8 @@ export function ApplicationsPage() {
   ])
   const [filters, setFilters] = useState<ApplicationFilters>(initialFilters)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingApplication, setEditingApplication] =
+    useState<Application | null>(null)
 
   useEffect(() => {
     saveApplications(applications)
@@ -58,6 +60,25 @@ export function ApplicationsPage() {
     filteredApplications.length === 1 ? 'application' : 'applications'
   }`
 
+  function closeForm() {
+    setIsFormOpen(false)
+    setEditingApplication(null)
+  }
+
+  function handleDelete(application: Application) {
+    const shouldDelete = window.confirm(
+      `Delete the application for ${application.position} at ${application.company}?`,
+    )
+
+    if (!shouldDelete) return
+
+    setApplications((current) =>
+      current.filter((item) => item.id !== application.id),
+    )
+
+    if (editingApplication?.id === application.id) closeForm()
+  }
+
   return (
     <main className="applications-page">
       <header className="page-header">
@@ -76,7 +97,10 @@ export function ApplicationsPage() {
           <button
             className="primary-button add-application-button"
             type="button"
-            onClick={() => setIsFormOpen(true)}
+            onClick={() => {
+              setEditingApplication(null)
+              setIsFormOpen(true)
+            }}
             aria-expanded={isFormOpen}
             aria-controls="new-application-form"
             disabled={isFormOpen}
@@ -89,11 +113,19 @@ export function ApplicationsPage() {
       {isFormOpen && (
         <div id="new-application-form">
           <ApplicationForm
+            key={editingApplication?.id ?? 'new-application'}
+            application={editingApplication ?? undefined}
             onSubmit={(application) => {
-              setApplications((current) => [...current, application])
-              setIsFormOpen(false)
+              setApplications((current) =>
+                editingApplication
+                  ? current.map((item) =>
+                      item.id === application.id ? application : item,
+                    )
+                  : [...current, application],
+              )
+              closeForm()
             }}
-            onCancel={() => setIsFormOpen(false)}
+            onCancel={closeForm}
           />
         </div>
       )}
@@ -111,7 +143,16 @@ export function ApplicationsPage() {
       {filteredApplications.length > 0 ? (
         <section className="applications-grid" aria-label="Job applications">
           {filteredApplications.map((application) => (
-            <ApplicationCard key={application.id} application={application} />
+            <ApplicationCard
+              key={application.id}
+              application={application}
+              onEdit={(selectedApplication) => {
+                setEditingApplication(selectedApplication)
+                setIsFormOpen(true)
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
+              onDelete={handleDelete}
+            />
           ))}
         </section>
       ) : (

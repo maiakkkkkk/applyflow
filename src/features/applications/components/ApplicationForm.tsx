@@ -8,6 +8,7 @@ import type {
 } from '../types'
 
 interface ApplicationFormProps {
+  application?: Application
   onSubmit: (application: Application) => void
   onCancel: () => void
 }
@@ -28,17 +29,19 @@ interface FormValues {
 type RequiredField = 'company' | 'position' | 'status' | 'source'
 type FormErrors = Partial<Record<RequiredField, string>>
 
-const initialValues: FormValues = {
-  company: '',
-  position: '',
-  status: '',
-  source: '',
-  workMode: '',
-  employmentType: '',
-  location: '',
-  jobUrl: '',
-  technologies: '',
-  notes: '',
+function getInitialValues(application?: Application): FormValues {
+  return {
+    company: application?.company ?? '',
+    position: application?.position ?? '',
+    status: application?.status ?? '',
+    source: application?.source ?? '',
+    workMode: application?.workMode ?? '',
+    employmentType: application?.employmentType ?? '',
+    location: application?.location ?? '',
+    jobUrl: application?.jobUrl ?? '',
+    technologies: application?.technologies?.join(', ') ?? '',
+    notes: application?.notes ?? '',
+  }
 }
 
 function createTemporaryId() {
@@ -50,10 +53,14 @@ function createTemporaryId() {
 }
 
 export function ApplicationForm({
+  application: applicationToEdit,
   onSubmit,
   onCancel,
 }: ApplicationFormProps) {
-  const [values, setValues] = useState<FormValues>(initialValues)
+  const isEditing = applicationToEdit !== undefined
+  const [values, setValues] = useState<FormValues>(() =>
+    getInitialValues(applicationToEdit),
+  )
   const [errors, setErrors] = useState<FormErrors>({})
 
   function updateValue<Field extends keyof FormValues>(
@@ -88,25 +95,32 @@ export function ApplicationForm({
     const timestamp = new Date().toISOString()
 
     const application: Application = {
-      id: createTemporaryId(),
+      ...applicationToEdit,
+      id: applicationToEdit?.id ?? createTemporaryId(),
       company: values.company.trim(),
       position: values.position.trim(),
       status: values.status as ApplicationStatus,
       source: values.source as ApplicationSource,
-      createdAt: timestamp,
+      createdAt: applicationToEdit?.createdAt ?? timestamp,
       updatedAt: timestamp,
-      ...(values.workMode && { workMode: values.workMode }),
-      ...(values.employmentType && {
-        employmentType: values.employmentType,
-      }),
-      ...(values.location.trim() && { location: values.location.trim() }),
-      ...(values.jobUrl.trim() && { jobUrl: values.jobUrl.trim() }),
-      ...(technologies.length > 0 && { technologies }),
-      ...(values.notes.trim() && { notes: values.notes.trim() }),
     }
 
+    if (values.workMode) application.workMode = values.workMode
+    else delete application.workMode
+    if (values.employmentType)
+      application.employmentType = values.employmentType
+    else delete application.employmentType
+    if (values.location.trim()) application.location = values.location.trim()
+    else delete application.location
+    if (values.jobUrl.trim()) application.jobUrl = values.jobUrl.trim()
+    else delete application.jobUrl
+    if (technologies.length > 0) application.technologies = technologies
+    else delete application.technologies
+    if (values.notes.trim()) application.notes = values.notes.trim()
+    else delete application.notes
+
     onSubmit(application)
-    setValues(initialValues)
+    setValues(getInitialValues())
     setErrors({})
   }
 
@@ -114,8 +128,14 @@ export function ApplicationForm({
     <section className="application-form-panel" aria-labelledby="form-title">
       <div className="application-form-panel__header">
         <div>
-          <h2 id="form-title">Add application</h2>
-          <p>Record a new opportunity in your application tracker.</p>
+          <h2 id="form-title">
+            {isEditing ? 'Edit application' : 'Add application'}
+          </h2>
+          <p>
+            {isEditing
+              ? 'Update the details for this job application.'
+              : 'Record a new opportunity in your application tracker.'}
+          </p>
         </div>
       </div>
 
@@ -300,7 +320,7 @@ export function ApplicationForm({
             Cancel
           </button>
           <button className="primary-button" type="submit">
-            Save application
+            {isEditing ? 'Save changes' : 'Save application'}
           </button>
         </div>
       </form>
