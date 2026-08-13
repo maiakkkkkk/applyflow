@@ -1,11 +1,7 @@
+import { ApplicationsPage } from '../pages/ApplicationsPage'
+
 function App() {
-  return (
-    <main>
-      <h1>ApplyFlow</h1>
-      <p>Job Application Tracker</p>
-      <small>Projeto em desenvolvimento.</small>
-    </main>
-  )
+  return <ApplicationsPage />
 }
 
 export default App
