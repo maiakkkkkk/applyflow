@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { ApplicationCard } from '../features/applications/components/ApplicationCard'
+import { ApplicationForm } from '../features/applications/components/ApplicationForm'
 import {
   ApplicationsFilters,
   type ApplicationFilters,
 } from '../features/applications/components/ApplicationsFilters'
 import { mockApplications } from '../features/applications/data/mockApplications'
+import type { Application } from '../features/applications/types'
 
 const initialFilters: ApplicationFilters = {
   search: '',
@@ -14,10 +16,14 @@ const initialFilters: ApplicationFilters = {
 }
 
 export function ApplicationsPage() {
+  const [applications, setApplications] = useState<Application[]>(() => [
+    ...mockApplications,
+  ])
   const [filters, setFilters] = useState<ApplicationFilters>(initialFilters)
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
   const normalizedSearch = filters.search.trim().toLocaleLowerCase()
-  const filteredApplications = mockApplications.filter((application) => {
+  const filteredApplications = applications.filter((application) => {
     const searchableContent = [
       application.company,
       application.position,
@@ -50,15 +56,39 @@ export function ApplicationsPage() {
         <a className="brand" href="/" aria-label="ApplyFlow home">
           ApplyFlow
         </a>
-        <div className="page-heading">
-          <p className="eyebrow">Job Application Tracker</p>
-          <h1>Applications</h1>
-          <p className="page-description">
-            Keep track of every opportunity and see where each application
-            stands.
-          </p>
+        <div className="page-heading-row">
+          <div className="page-heading">
+            <p className="eyebrow">Job Application Tracker</p>
+            <h1>Applications</h1>
+            <p className="page-description">
+              Keep track of every opportunity and see where each application
+              stands.
+            </p>
+          </div>
+          <button
+            className="primary-button add-application-button"
+            type="button"
+            onClick={() => setIsFormOpen(true)}
+            aria-expanded={isFormOpen}
+            aria-controls="new-application-form"
+            disabled={isFormOpen}
+          >
+            Add application
+          </button>
         </div>
       </header>
+
+      {isFormOpen && (
+        <div id="new-application-form">
+          <ApplicationForm
+            onSubmit={(application) => {
+              setApplications((current) => [...current, application])
+              setIsFormOpen(false)
+            }}
+            onCancel={() => setIsFormOpen(false)}
+          />
+        </div>
+      )}
 
       <ApplicationsFilters
         filters={filters}
