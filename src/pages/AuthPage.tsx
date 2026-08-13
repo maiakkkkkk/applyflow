@@ -4,13 +4,14 @@ import { useAuth } from '../features/auth/context/AuthContext'
 type AuthMode = 'sign-in' | 'sign-up'
 
 export function AuthPage() {
-  const { signIn, signUp } = useAuth()
+  const { signIn, signInWithGoogle, signUp } = useAuth()
   const [mode, setMode] = useState<AuthMode>('sign-in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -55,6 +56,30 @@ export function AuthPage() {
     }
   }
 
+  async function handleGoogleSignIn() {
+    if (isGoogleSubmitting || isSubmitting) return
+
+    setError('')
+    setMessage('')
+    setIsGoogleSubmitting(true)
+
+    try {
+      const { error: googleError } = await signInWithGoogle()
+
+      if (googleError) {
+        setError(googleError.message)
+        setIsGoogleSubmitting(false)
+      }
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Google authentication could not be started.',
+      )
+      setIsGoogleSubmitting(false)
+    }
+  }
+
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode)
     setError('')
@@ -85,7 +110,7 @@ export function AuthPage() {
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isGoogleSubmitting}
             />
           </div>
           <div className="form-field">
@@ -97,7 +122,7 @@ export function AuthPage() {
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isGoogleSubmitting}
             />
           </div>
 
@@ -115,7 +140,7 @@ export function AuthPage() {
           <button
             className="primary-button auth-submit"
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isGoogleSubmitting}
           >
             {isSubmitting
               ? 'Please wait…'
@@ -125,12 +150,25 @@ export function AuthPage() {
           </button>
         </form>
 
+        <div className="auth-divider" aria-hidden="true">
+          <span>or</span>
+        </div>
+
+        <button
+          className="google-auth-button"
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={isSubmitting || isGoogleSubmitting}
+        >
+          {isGoogleSubmitting ? 'Connecting to Google…' : 'Continue with Google'}
+        </button>
+
         <p className="auth-switch">
           {isSignIn ? "Don't have an account?" : 'Already have an account?'}{' '}
           <button
             type="button"
             onClick={() => changeMode(isSignIn ? 'sign-up' : 'sign-in')}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isGoogleSubmitting}
           >
             {isSignIn ? 'Sign up' : 'Sign in'}
           </button>
