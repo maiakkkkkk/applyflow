@@ -22,6 +22,7 @@ interface FormValues {
   employmentType: EmploymentType | ''
   location: string
   jobUrl: string
+  nextActionAt: string
   technologies: string
   notes: string
 }
@@ -39,6 +40,7 @@ function getInitialValues(application?: Application): FormValues {
     employmentType: application?.employmentType ?? '',
     location: application?.location ?? '',
     jobUrl: application?.jobUrl ?? '',
+    nextActionAt: application?.nextActionAt ?? '',
     technologies: application?.technologies?.join(', ') ?? '',
     notes: application?.notes ?? '',
   }
@@ -114,6 +116,8 @@ export function ApplicationForm({
     else delete application.location
     if (values.jobUrl.trim()) application.jobUrl = values.jobUrl.trim()
     else delete application.jobUrl
+    if (values.nextActionAt) application.nextActionAt = values.nextActionAt
+    else delete application.nextActionAt
     if (technologies.length > 0) application.technologies = technologies
     else delete application.technologies
     if (values.notes.trim()) application.notes = values.notes.trim()
@@ -286,6 +290,18 @@ export function ApplicationForm({
             value={values.jobUrl}
             onChange={(event) => updateValue('jobUrl', event.target.value)}
             placeholder="https://"
+          />
+        </div>
+
+        <div className="form-field">
+          <label htmlFor="next-action-at">Next action date</label>
+          <input
+            id="next-action-at"
+            type="date"
+            value={values.nextActionAt}
+            onChange={(event) =>
+              updateValue('nextActionAt', event.target.value)
+            }
           />
         </div>
 
