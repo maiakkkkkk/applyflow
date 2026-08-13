@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ApplicationCard } from '../features/applications/components/ApplicationCard'
 import { ApplicationForm } from '../features/applications/components/ApplicationForm'
 import {
@@ -6,6 +6,10 @@ import {
   type ApplicationFilters,
 } from '../features/applications/components/ApplicationsFilters'
 import { mockApplications } from '../features/applications/data/mockApplications'
+import {
+  loadApplications,
+  saveApplications,
+} from '../features/applications/storage/applicationsStorage'
 import type { Application } from '../features/applications/types'
 
 const initialFilters: ApplicationFilters = {
@@ -17,10 +21,14 @@ const initialFilters: ApplicationFilters = {
 
 export function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>(() => [
-    ...mockApplications,
+    ...(loadApplications() ?? mockApplications),
   ])
   const [filters, setFilters] = useState<ApplicationFilters>(initialFilters)
   const [isFormOpen, setIsFormOpen] = useState(false)
+
+  useEffect(() => {
+    saveApplications(applications)
+  }, [applications])
 
   const normalizedSearch = filters.search.trim().toLocaleLowerCase()
   const filteredApplications = applications.filter((application) => {
