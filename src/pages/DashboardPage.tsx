@@ -1,18 +1,8 @@
 import { useApplications } from '../features/applications/context/ApplicationsContext'
-import type { ApplicationStatus } from '../features/applications/types'
-
-const statuses: ReadonlyArray<{
-  status: ApplicationStatus
-  label: string
-}> = [
-  { status: 'saved', label: 'Saved' },
-  { status: 'applied', label: 'Applied' },
-  { status: 'test', label: 'Test' },
-  { status: 'interview', label: 'Interview' },
-  { status: 'offer', label: 'Offer' },
-  { status: 'rejected', label: 'Rejected' },
-  { status: 'withdrawn', label: 'Withdrawn' },
-]
+import {
+  applicationStatuses,
+  calculateApplicationAnalytics,
+} from '../features/applications/utils/applicationAnalytics'
 
 const dateFormatter = new Intl.DateTimeFormat('en', {
   dateStyle: 'medium',
@@ -20,22 +10,8 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
 
 export function DashboardPage() {
   const { applications, isLoading, error } = useApplications()
-  const statusCounts = Object.fromEntries(
-    statuses.map(({ status }) => [
-      status,
-      applications.filter((application) => application.status === status)
-        .length,
-    ]),
-  ) as Record<ApplicationStatus, number>
-  const activeApplications = applications.filter(
-    ({ status }) => status !== 'rejected' && status !== 'withdrawn',
-  ).length
-  const recentApplications = [...applications]
-    .sort(
-      (first, second) =>
-        Date.parse(second.updatedAt) - Date.parse(first.updatedAt),
-    )
-    .slice(0, 5)
+  const { statusCounts, activeApplications, recentApplications } =
+    calculateApplicationAnalytics(applications)
   const metrics = [
     { label: 'Total applications', value: applications.length },
     { label: 'Active applications', value: activeApplications },
@@ -74,7 +50,7 @@ export function DashboardPage() {
         <section className="dashboard-panel" aria-labelledby="distribution-title">
           <h2 id="distribution-title">Status distribution</h2>
           <ul className="status-distribution">
-            {statuses.map(({ status, label }) => {
+            {applicationStatuses.map(({ status, label }) => {
               const count = statusCounts[status]
               const percentage = applications.length
                 ? (count / applications.length) * 100
@@ -114,7 +90,7 @@ export function DashboardPage() {
                   </div>
                   <div className="recent-application__meta">
                     <span className={`status-badge status-badge--${application.status}`}>
-                      {statuses.find(({ status }) => status === application.status)?.label}
+                      {applicationStatuses.find(({ status }) => status === application.status)?.label}
                     </span>
                     <time dateTime={application.updatedAt}>
                       {dateFormatter.format(new Date(application.updatedAt))}
