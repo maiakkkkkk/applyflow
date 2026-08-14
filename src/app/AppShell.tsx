@@ -56,6 +56,14 @@ export function AppShell() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const location = useLocation()
   useEffect(() => setIsMenuOpen(false), [location.pathname])
+  useEffect(() => {
+    if (!isMenuOpen) return
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setIsMenuOpen(false)
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => document.removeEventListener('keydown', closeOnEscape)
+  }, [isMenuOpen])
 
   return <div className="app-shell">
     <aside className="app-sidebar"><SidebarContent /></aside>
@@ -63,7 +71,7 @@ export function AppShell() {
       <NavLink className="brand" to="/" aria-label="ApplyFlow home"><BrandLogo /></NavLink>
       <button className="mobile-menu-button" type="button" aria-expanded={isMenuOpen} aria-controls="mobile-navigation" aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'} onClick={() => setIsMenuOpen((open) => !open)}><AppIcon name={isMenuOpen ? 'close' : 'menu'} /></button>
     </header>
-    {isMenuOpen && <button className="mobile-navigation-backdrop" type="button" aria-label="Close navigation menu" onClick={() => setIsMenuOpen(false)} />}
+    {isMenuOpen && <button className="mobile-navigation-backdrop" type="button" tabIndex={-1} aria-label="Close navigation menu" onClick={() => setIsMenuOpen(false)} />}
     <aside id="mobile-navigation" className={`mobile-navigation${isMenuOpen ? ' mobile-navigation--open' : ''}`} aria-hidden={!isMenuOpen}><SidebarContent onNavigate={() => setIsMenuOpen(false)} /></aside>
     <div className="app-content"><Outlet /></div>
   </div>

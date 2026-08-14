@@ -51,6 +51,17 @@ describe('AppShell', () => {
     expect(screen.getByRole('heading', { name: 'Follow-ups content' })).toBeVisible()
   })
 
+  it('closes the mobile menu with Escape', async () => {
+    const user = userEvent.setup()
+    renderShell()
+
+    await user.click(screen.getByRole('button', { name: 'Open navigation menu' }))
+    expect(screen.getAllByRole('button', { name: 'Close navigation menu' })[0]).toHaveAttribute('aria-expanded', 'true')
+
+    await user.keyboard('{Escape}')
+    expect(screen.getByRole('button', { name: 'Open navigation menu' })).toHaveAttribute('aria-expanded', 'false')
+  })
+
   it('calls the existing sign-out action', async () => {
     const user = userEvent.setup()
     signOut.mockResolvedValue(undefined)
