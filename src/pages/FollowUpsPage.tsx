@@ -15,6 +15,12 @@ const groups: ReadonlyArray<{ key: FollowUpGroup; label: string }> = [
   { key: 'upcoming', label: 'Upcoming' },
 ]
 
+const groupDescriptions: Record<FollowUpGroup, string> = {
+  overdue: 'Actions that have passed their scheduled date.',
+  today: 'Actions scheduled for today.',
+  upcoming: 'Actions planned for the days ahead.',
+}
+
 export function FollowUpsPage() {
   const { showToast } = useToast()
   const { applications, updateApplication, isLoading, error } = useApplications()
@@ -49,7 +55,7 @@ export function FollowUpsPage() {
 
   return (
     <main className="follow-ups-page">
-      <header className="page-header">
+      <header className="page-header follow-ups-header">
         <p className="eyebrow">Next actions</p>
         <h1>Follow-ups</h1>
         <p className="page-description">
@@ -64,7 +70,8 @@ export function FollowUpsPage() {
       )}
 
       {isLoading && (
-        <div className="data-loading" aria-live="polite">
+        <div className="data-loading workspace-loading" aria-live="polite">
+          <span className="dashboard-loading__indicator" aria-hidden="true" />
           Loading follow-ups…
         </div>
       )}
@@ -84,7 +91,7 @@ export function FollowUpsPage() {
             aria-labelledby={`follow-up-${group.key}`}
           >
             <header>
-              <h2 id={`follow-up-${group.key}`}>{group.label}</h2>
+              <div><h2 id={`follow-up-${group.key}`}>{group.label}</h2><p>{groupDescriptions[group.key]}</p></div>
               <span>{groupedApplications[group.key].length}</span>
             </header>
 

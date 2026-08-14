@@ -27,17 +27,16 @@ export function ApplicationsFilters({
 
   return (
     <div className="filters" aria-label="Application filters">
+      <div className="filters__header">
+        <div><AppIcon name="filter" /><span>Filter applications</span></div>
+        {hasActiveFilters && <span className="filters__active">Filters active</span>}
+      </div>
       <div className="filter-field filter-field--search">
         <label htmlFor="application-search">Search</label>
-        <input
-          id="application-search"
-          type="search"
-          placeholder="Company, position, or technology"
-          value={filters.search}
-          onChange={(event) =>
-            onChange({ ...filters, search: event.target.value })
-          }
-        />
+        <div className="search-input"><AppIcon name="search" /><input
+            id="application-search" type="search" placeholder="Company, position, or technology"
+            value={filters.search} onChange={(event) => onChange({ ...filters, search: event.target.value })}
+          /></div>
       </div>
 
       <div className="filter-field">

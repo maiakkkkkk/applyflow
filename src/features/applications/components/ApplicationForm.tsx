@@ -153,6 +153,7 @@ export function ApplicationForm({
       </div>
 
       <form className="application-form" onSubmit={handleSubmit} noValidate>
+        <div className="form-section-heading form-field--full"><h3>Opportunity</h3><p>Core details about the role and company.</p></div>
         <div className="form-field">
           <label htmlFor="company">Company *</label>
           <input
@@ -186,6 +187,7 @@ export function ApplicationForm({
           )}
         </div>
 
+        <div className="form-section-heading form-field--full"><h3>Tracking</h3><p>Where this application currently stands.</p></div>
         <div className="form-field">
           <label htmlFor="application-status">Status *</label>
           <select
@@ -244,6 +246,7 @@ export function ApplicationForm({
           )}
         </div>
 
+        <div className="form-section-heading form-field--full"><h3>Work details</h3><p>Optional context about the opportunity.</p></div>
         <div className="form-field">
           <label htmlFor="application-work-mode">Work mode</label>
           <select
@@ -314,6 +317,7 @@ export function ApplicationForm({
           />
         </div>
 
+        <div className="form-section-heading form-field--full"><h3>Additional information</h3><p>Useful context for later conversations.</p></div>
         <div className="form-field form-field--full">
           <label htmlFor="technologies">Technologies</label>
           <input

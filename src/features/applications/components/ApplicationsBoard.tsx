@@ -44,7 +44,7 @@ export function ApplicationsBoard({
 
         return (
           <section
-            className="board-column"
+            className={`board-column board-column--${column.status}`}
             key={column.status}
             aria-labelledby={`column-${column.status}`}
           >
@@ -65,6 +65,12 @@ export function ApplicationsBoard({
                     <p className="board-card__work-mode">
                       {workModeLabels[application.workMode]}
                     </p>
+                  )}
+                  {application.nextActionAt && <p className="board-card__next-action"><AppIcon name="calendar" />{application.nextActionAt}</p>}
+                  {application.technologies && application.technologies.length > 0 && (
+                    <ul className="board-card__technologies" aria-label="Technologies">
+                      {application.technologies.slice(0, 3).map((technology) => <li key={technology}>{technology}</li>)}
+                    </ul>
                   )}
 
                   <label htmlFor={`board-status-${application.id}`}>
