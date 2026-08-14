@@ -1,6 +1,7 @@
-import { render, screen, within } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { createApplicationFixture } from '../test/fixtures/applications'
+import { renderWithRouter } from '../test/testUtils'
 import { DashboardPage } from './DashboardPage'
 
 const mockedUseApplications = vi.fn()
@@ -21,7 +22,7 @@ describe('DashboardPage', () => {
     ]
     mockedUseApplications.mockReturnValue({ applications, isLoading: false, error: null })
 
-    render(<DashboardPage />)
+    renderWithRouter(<DashboardPage />)
 
     const metric = (name: string) => screen.getByText(name).closest('article')
     expect(metric('Total applications')).toHaveTextContent('6')
@@ -31,6 +32,8 @@ describe('DashboardPage', () => {
     expect(metric('Rejected applications')).toHaveTextContent('1')
     expect(screen.getByRole('progressbar', { name: 'Interview: 1' })).toBeVisible()
     expect(screen.getByRole('progressbar', { name: 'Offer: 1' })).toBeVisible()
+    expect(screen.getByRole('progressbar', { name: 'Interview: 1' })).toHaveAttribute('aria-valuemax', '6')
+    expect(screen.getAllByText('17%').length).toBeGreaterThan(0)
 
     const recent = screen.getByRole('heading', { name: 'Recently updated' }).closest('section')
     const items = within(recent as HTMLElement).getAllByRole('listitem')
@@ -40,5 +43,15 @@ describe('DashboardPage', () => {
     expect(items[3]).toHaveTextContent('Applied role')
     expect(items[4]).toHaveTextContent('Rejected role')
     expect(screen.queryByText('Old role')).not.toBeInTheDocument()
+  })
+
+  it('shows an intentional empty state when there are no applications', () => {
+    mockedUseApplications.mockReturnValue({ applications: [], isLoading: false, error: null })
+
+    renderWithRouter(<DashboardPage />)
+
+    expect(screen.getByRole('heading', { name: 'No applications yet' })).toBeVisible()
+    expect(screen.getByRole('link', { name: 'Add application' })).toHaveAttribute('href', '/applications')
+    expect(screen.queryByLabelText('Application summary')).not.toBeInTheDocument()
   })
 })
