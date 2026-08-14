@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ToastProvider } from '../components/feedback/ToastProvider'
@@ -17,13 +17,16 @@ const application = createApplicationFixture({
   position: 'Frontend Developer',
 })
 
-function renderPage(deleteApplication: ReturnType<typeof vi.fn>) {
+function renderPage(
+  deleteApplication: ReturnType<typeof vi.fn>,
+  changeApplicationStatus = vi.fn().mockResolvedValue(undefined),
+) {
   mockedUseApplications.mockReturnValue({
     applications: [application],
     createApplication: vi.fn(),
     updateApplication: vi.fn(),
     deleteApplication,
-    changeApplicationStatus: vi.fn(),
+    changeApplicationStatus,
     isLoading: false,
     error: null,
     reloadApplications: vi.fn(),
@@ -65,5 +68,17 @@ describe('ApplicationsPage feedback', () => {
     )
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(screen.queryByText('SQL details')).not.toBeInTheDocument()
+  })
+
+  it('switches to the board and preserves status-change behavior', async () => {
+    const changeApplicationStatus = vi.fn().mockResolvedValue(undefined)
+    renderPage(vi.fn(), changeApplicationStatus)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Board' }))
+    expect(screen.getByRole('button', { name: 'Board' })).toHaveAttribute('aria-pressed', 'true')
+
+    const board = screen.getByRole('region', { name: 'Applications board' })
+    await userEvent.selectOptions(within(board).getByLabelText('Status'), 'interview')
+    expect(changeApplicationStatus).toHaveBeenCalledWith(application.id, 'interview')
   })
 })

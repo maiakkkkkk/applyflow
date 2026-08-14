@@ -1,7 +1,7 @@
 export type AppIconName =
   | 'dashboard' | 'applications' | 'followUps' | 'plus' | 'search'
   | 'filter' | 'list' | 'board' | 'calendar' | 'edit' | 'trash'
-  | 'externalLink' | 'check' | 'close' | 'menu' | 'logout' | 'chevronDown'
+  | 'externalLink' | 'check' | 'close' | 'menu' | 'logout' | 'chevronDown' | 'mapPin'
 
 interface AppIconProps {
   name: AppIconName
@@ -26,6 +26,7 @@ const paths: Record<AppIconName, React.ReactNode> = {
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   logout: <><path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4m5-4 3-3-3-3m3 3H9" /></>,
   chevronDown: <path d="m7 9 5 5 5-5" />,
+  mapPin: <><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></>,
 }
 
 export function AppIcon({ name, className }: AppIconProps) {

@@ -135,7 +135,7 @@ export function ApplicationsPage() {
 
   return (
     <main className="applications-page">
-      <header className="page-header">
+      <header className="page-header applications-header">
         <div className="page-heading-row">
           <div className="page-heading">
             <p className="eyebrow">Job Application Tracker</p>
@@ -235,7 +235,8 @@ export function ApplicationsPage() {
       </div>
 
       {isLoading ? (
-        <div className="data-loading" aria-live="polite">
+        <div className="data-loading workspace-loading" aria-live="polite">
+          <span className="dashboard-loading__indicator" aria-hidden="true" />
           Loading applications…
         </div>
       ) : filteredApplications.length > 0 ? (
@@ -261,8 +262,9 @@ export function ApplicationsPage() {
         )
       ) : (
         <div className="empty-state">
-          <h2>No applications found</h2>
-          <p>Try changing or clearing your filters.</p>
+          <span className="empty-state__icon" aria-hidden="true"><AppIcon name={applications.length === 0 ? 'applications' : 'search'} /></span>
+          <h2>{applications.length === 0 ? 'No applications yet' : 'No applications found'}</h2>
+          <p>{applications.length === 0 ? 'Add your first opportunity to begin tracking your job search.' : 'Try changing or clearing your filters.'}</p>
         </div>
       )}
 

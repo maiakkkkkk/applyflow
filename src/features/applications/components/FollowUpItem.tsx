@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Application, ApplicationStatus } from '../types'
+import { AppIcon } from '../../../components/icons/AppIcon'
 
 interface FollowUpItemProps {
   application: Application & { nextActionAt: string }
@@ -50,13 +51,14 @@ export function FollowUpItem({
   return (
     <article className="follow-up-item">
       <div className="follow-up-item__details">
-        <p>{application.company}</p>
         <h3>{application.position}</h3>
+        <p>{application.company}</p>
         <div className="follow-up-item__meta">
           <span className={`status-badge status-badge--${application.status}`}>
             {statusLabels[application.status]}
           </span>
           <time dateTime={application.nextActionAt}>
+            <AppIcon name="calendar" />
             {formatDate(application.nextActionAt)}
           </time>
         </div>
@@ -88,6 +90,7 @@ export function FollowUpItem({
                 )
               }
             >
+              <AppIcon name="calendar" />
               {pendingAction === 'reschedule' ? 'Updating…' : 'Update'}
             </button>
           </div>
@@ -100,6 +103,7 @@ export function FollowUpItem({
             void runAction('complete', () => onComplete(application))
           }
         >
+          <AppIcon name="check" />
           {pendingAction === 'complete' ? 'Completing…' : 'Mark complete'}
         </button>
       </div>
