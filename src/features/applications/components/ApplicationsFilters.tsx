@@ -3,6 +3,7 @@ import type {
   ApplicationStatus,
   WorkMode,
 } from '../types'
+import { AppIcon } from '../../../components/icons/AppIcon'
 
 export interface ApplicationFilters {
   search: string
@@ -108,6 +109,7 @@ export function ApplicationsFilters({
         onClick={onClear}
         disabled={!hasActiveFilters}
       >
+        <AppIcon name="close" />
         Clear filters
       </button>
     </div>

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { BrandLogo } from '../components/brand/BrandLogo'
 import { useAuth } from '../features/auth/context/AuthContext'
 
 type AuthMode = 'sign-in' | 'sign-up'
@@ -92,7 +93,7 @@ export function AuthPage() {
     <main className="auth-page">
       <section className="auth-intro" aria-label="About ApplyFlow">
         <div className="auth-intro__content">
-          <p className="auth-brand"><span className="brand-mark" aria-hidden="true">A</span>ApplyFlow</p>
+          <div className="auth-brand"><BrandLogo /></div>
           <p className="eyebrow">Your career workspace</p>
           <h1>Keep every opportunity moving forward.</h1>
           <p>Organize applications, stay on top of follow-ups, and see your progress clearly—all in one focused workspace.</p>

@@ -1,4 +1,5 @@
 import type { Application, ApplicationStatus, WorkMode } from '../types'
+import { AppIcon } from '../../../components/icons/AppIcon'
 
 interface ApplicationsBoardProps {
   applications: Application[]
@@ -92,6 +93,7 @@ export function ApplicationsBoard({
 
                   <div className="board-card__actions">
                     <button type="button" onClick={() => onEdit(application)}>
+                      <AppIcon name="edit" />
                       Edit
                     </button>
                     <button
@@ -99,6 +101,7 @@ export function ApplicationsBoard({
                       type="button"
                       onClick={() => onDelete(application)}
                     >
+                      <AppIcon name="trash" />
                       Delete
                     </button>
                   </div>

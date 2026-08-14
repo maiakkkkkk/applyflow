@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ConfirmDialog } from '../components/feedback/ConfirmDialog'
+import { AppIcon } from '../components/icons/AppIcon'
 import { useToast } from '../components/feedback/ToastContext'
 import { ApplicationCard } from '../features/applications/components/ApplicationCard'
 import { ApplicationsBoard } from '../features/applications/components/ApplicationsBoard'
@@ -155,6 +156,7 @@ export function ApplicationsPage() {
             aria-controls="new-application-form"
             disabled={isFormOpen}
           >
+            <AppIcon name="plus" />
             Add application
           </button>
         </div>
@@ -218,6 +220,7 @@ export function ApplicationsPage() {
             aria-pressed={viewMode === 'list'}
             onClick={() => setViewMode('list')}
           >
+            <AppIcon name="list" />
             List
           </button>
           <button
@@ -225,6 +228,7 @@ export function ApplicationsPage() {
             aria-pressed={viewMode === 'board'}
             onClick={() => setViewMode('board')}
           >
+            <AppIcon name="board" />
             Board
           </button>
         </div>
