@@ -1,109 +1,61 @@
+import { Link } from 'react-router'
+import { AppIcon } from '../components/icons/AppIcon'
 import { useApplications } from '../features/applications/context/ApplicationsContext'
-import {
-  applicationStatuses,
-  calculateApplicationAnalytics,
-} from '../features/applications/utils/applicationAnalytics'
-
-const dateFormatter = new Intl.DateTimeFormat('en', {
-  dateStyle: 'medium',
-})
+import { calculateApplicationAnalytics } from '../features/applications/utils/applicationAnalytics'
+import { MetricCard } from '../features/dashboard/components/MetricCard'
+import { RecentApplications } from '../features/dashboard/components/RecentApplications'
+import { StatusDistribution } from '../features/dashboard/components/StatusDistribution'
 
 export function DashboardPage() {
   const { applications, isLoading, error } = useApplications()
-  const { statusCounts, activeApplications, recentApplications } =
-    calculateApplicationAnalytics(applications)
+  const { statusCounts, activeApplications, recentApplications } = calculateApplicationAnalytics(applications)
   const metrics = [
-    { label: 'Total applications', value: applications.length },
-    { label: 'Active applications', value: activeApplications },
-    { label: 'Interviews', value: statusCounts.interview },
-    { label: 'Offers', value: statusCounts.offer },
-    { label: 'Rejected applications', value: statusCounts.rejected },
+    { label: 'Total applications', value: applications.length, icon: 'applications' as const },
+    { label: 'Active applications', value: activeApplications, icon: 'dashboard' as const },
+    { label: 'Interviews', value: statusCounts.interview, icon: 'calendar' as const },
+    { label: 'Offers', value: statusCounts.offer, icon: 'check' as const, tone: 'success' as const },
+    { label: 'Rejected applications', value: statusCounts.rejected, icon: 'close' as const, tone: 'danger' as const },
   ]
 
   return (
     <main className="dashboard-page">
-      <header className="page-header">
-        <p className="eyebrow">Overview</p>
-        <h1>Dashboard</h1>
-        <p className="page-description">
-          A snapshot of your job application progress.
-        </p>
+      <header className="page-header dashboard-header">
+        <div className="page-heading">
+          <p className="eyebrow">Overview</p>
+          <h1>Dashboard</h1>
+          <p className="page-description">A clear view of your applications and latest activity.</p>
+        </div>
+        <Link className="secondary-button dashboard-header__action" to="/applications">
+          View applications <AppIcon name="externalLink" />
+        </Link>
       </header>
 
       {error && <p className="remote-error" role="alert">{error}</p>}
       {isLoading && (
-        <div className="data-loading" aria-live="polite">
-          Loading dashboard…
+        <div className="dashboard-loading" aria-live="polite">
+          <span className="dashboard-loading__indicator" aria-hidden="true" />
+          <div><strong>Loading dashboard</strong><span>Preparing your application overview…</span></div>
         </div>
       )}
 
-      {!isLoading && <><section className="metrics-grid" aria-label="Application summary">
-        {metrics.map((metric) => (
-          <article className="metric-card" key={metric.label}>
-            <p>{metric.label}</p>
-            <strong>{metric.value}</strong>
-          </article>
-        ))}
-      </section>
-
-      <div className="dashboard-sections">
-        <section className="dashboard-panel" aria-labelledby="distribution-title">
-          <h2 id="distribution-title">Status distribution</h2>
-          <ul className="status-distribution">
-            {applicationStatuses.map(({ status, label }) => {
-              const count = statusCounts[status]
-              const percentage = applications.length
-                ? (count / applications.length) * 100
-                : 0
-
-              return (
-                <li key={status}>
-                  <div>
-                    <span>{label}</span>
-                    <strong>{count}</strong>
-                  </div>
-                  <div
-                    className="status-progress"
-                    role="progressbar"
-                    aria-label={`${label}: ${count}`}
-                    aria-valuenow={count}
-                    aria-valuemin={0}
-                    aria-valuemax={applications.length}
-                  >
-                    <span style={{ width: `${percentage}%` }} />
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
+      {!isLoading && applications.length === 0 && (
+        <section className="dashboard-empty" aria-labelledby="dashboard-empty-title">
+          <span className="dashboard-empty__icon" aria-hidden="true"><AppIcon name="applications" /></span>
+          <h2 id="dashboard-empty-title">No applications yet</h2>
+          <p>Add your first opportunity to start building your application overview.</p>
+          <Link className="primary-button" to="/applications"><AppIcon name="plus" /> Add application</Link>
         </section>
+      )}
 
-        <section className="dashboard-panel" aria-labelledby="recent-title">
-          <h2 id="recent-title">Recently updated</h2>
-          {recentApplications.length > 0 ? (
-            <ul className="recent-applications">
-              {recentApplications.map((application) => (
-                <li key={application.id}>
-                  <div>
-                    <strong>{application.position}</strong>
-                    <span>{application.company}</span>
-                  </div>
-                  <div className="recent-application__meta">
-                    <span className={`status-badge status-badge--${application.status}`}>
-                      {applicationStatuses.find(({ status }) => status === application.status)?.label}
-                    </span>
-                    <time dateTime={application.updatedAt}>
-                      {dateFormatter.format(new Date(application.updatedAt))}
-                    </time>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="dashboard-empty">No applications to display yet.</p>
-          )}
+      {!isLoading && applications.length > 0 && <>
+        <section className="metrics-grid" aria-label="Application summary">
+          {metrics.map((metric) => <MetricCard key={metric.label} {...metric} />)}
         </section>
-      </div></>}
+        <div className="dashboard-sections">
+          <StatusDistribution statusCounts={statusCounts} total={applications.length} />
+          <RecentApplications applications={recentApplications} />
+        </div>
+      </>}
     </main>
   )
 }
