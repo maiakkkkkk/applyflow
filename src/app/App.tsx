@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router'
+import { ToastProvider } from '../components/feedback/ToastProvider'
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute'
 import { PublicOnlyRoute } from '../features/auth/components/PublicOnlyRoute'
 import { AuthProvider } from '../features/auth/context/AuthContext'
@@ -11,8 +12,9 @@ import { AppShell } from './AppShell'
 
 function App() {
   return (
-    <AuthProvider>
-      <Routes>
+    <ToastProvider>
+      <AuthProvider>
+        <Routes>
         <Route element={<PublicOnlyRoute />}>
           <Route path="auth" element={<AuthPage />} />
         </Route>
@@ -25,8 +27,9 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Route>
-      </Routes>
-    </AuthProvider>
+        </Routes>
+      </AuthProvider>
+    </ToastProvider>
   )
 }
 

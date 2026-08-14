@@ -3,6 +3,7 @@ import type { Application, ApplicationStatus, WorkMode } from '../types'
 interface ApplicationsBoardProps {
   applications: Application[]
   onStatusChange: (application: Application, status: ApplicationStatus) => void
+  pendingStatusIds?: ReadonlySet<string>
   onEdit: (application: Application) => void
   onDelete: (application: Application) => void
 }
@@ -29,6 +30,7 @@ const workModeLabels: Record<WorkMode, string> = {
 export function ApplicationsBoard({
   applications,
   onStatusChange,
+  pendingStatusIds = new Set(),
   onEdit,
   onDelete,
 }: ApplicationsBoardProps) {
@@ -70,6 +72,7 @@ export function ApplicationsBoard({
                   <select
                     id={`board-status-${application.id}`}
                     value={application.status}
+                    disabled={pendingStatusIds.has(application.id)}
                     onChange={(event) =>
                       onStatusChange(
                         application,

@@ -3,8 +3,8 @@ import type { Application, ApplicationStatus } from '../types'
 
 interface FollowUpItemProps {
   application: Application & { nextActionAt: string }
-  onComplete: (application: Application) => void
-  onReschedule: (application: Application, nextActionAt: string) => void
+  onComplete: (application: Application) => Promise<void>
+  onReschedule: (application: Application, nextActionAt: string) => Promise<void>
 }
 
 const statusLabels: Record<ApplicationStatus, string> = {
@@ -30,6 +30,22 @@ export function FollowUpItem({
   onReschedule,
 }: FollowUpItemProps) {
   const [nextActionAt, setNextActionAt] = useState(application.nextActionAt)
+  const [pendingAction, setPendingAction] = useState<
+    'complete' | 'reschedule' | null
+  >(null)
+
+  async function runAction(
+    action: 'complete' | 'reschedule',
+    mutation: () => Promise<void>,
+  ) {
+    if (pendingAction) return
+    setPendingAction(action)
+    try {
+      await mutation()
+    } finally {
+      setPendingAction(null)
+    }
+  }
 
   return (
     <article className="follow-up-item">
@@ -62,20 +78,29 @@ export function FollowUpItem({
               className="secondary-button"
               type="button"
               disabled={
-                !nextActionAt || nextActionAt === application.nextActionAt
+                pendingAction !== null ||
+                !nextActionAt ||
+                nextActionAt === application.nextActionAt
               }
-              onClick={() => onReschedule(application, nextActionAt)}
+              onClick={() =>
+                void runAction('reschedule', () =>
+                  onReschedule(application, nextActionAt),
+                )
+              }
             >
-              Update
+              {pendingAction === 'reschedule' ? 'Updating…' : 'Update'}
             </button>
           </div>
         </div>
         <button
           className="primary-button"
           type="button"
-          onClick={() => onComplete(application)}
+          disabled={pendingAction !== null}
+          onClick={() =>
+            void runAction('complete', () => onComplete(application))
+          }
         >
-          Mark complete
+          {pendingAction === 'complete' ? 'Completing…' : 'Mark complete'}
         </button>
       </div>
     </article>

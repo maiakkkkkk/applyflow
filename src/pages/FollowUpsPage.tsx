@@ -1,4 +1,5 @@
 import { FollowUpItem } from '../features/applications/components/FollowUpItem'
+import { useToast } from '../components/feedback/ToastContext'
 import { useApplications } from '../features/applications/context/ApplicationsContext'
 import type { Application } from '../features/applications/types'
 import {
@@ -15,24 +16,35 @@ const groups: ReadonlyArray<{ key: FollowUpGroup; label: string }> = [
 ]
 
 export function FollowUpsPage() {
+  const { showToast } = useToast()
   const { applications, updateApplication, isLoading, error } = useApplications()
   const { scheduledApplications, groupedApplications } = groupFollowUps(
     applications,
     new Date(),
   )
 
-  function completeFollowUp(application: Application) {
+  async function completeFollowUp(application: Application) {
     const updatedApplication = { ...application }
     delete updatedApplication.nextActionAt
-    void updateApplication(updatedApplication).catch(() => undefined)
+    try {
+      await updateApplication(updatedApplication)
+      showToast('Follow-up completed.', 'success')
+    } catch {
+      showToast('Unable to complete the follow-up. Please try again.', 'error')
+    }
   }
 
-  function rescheduleFollowUp(
+  async function rescheduleFollowUp(
     application: Application,
     nextActionAt: string,
   ) {
     if (!isValidDateOnly(nextActionAt)) return
-    void updateApplication({ ...application, nextActionAt }).catch(() => undefined)
+    try {
+      await updateApplication({ ...application, nextActionAt })
+      showToast('Follow-up rescheduled.', 'success')
+    } catch {
+      showToast('Unable to reschedule the follow-up. Please try again.', 'error')
+    }
   }
 
   return (
