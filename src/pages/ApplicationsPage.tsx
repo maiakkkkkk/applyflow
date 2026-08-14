@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { ConfirmDialog } from '../components/feedback/ConfirmDialog'
+import { useToast } from '../components/feedback/ToastContext'
 import { ApplicationCard } from '../features/applications/components/ApplicationCard'
 import { ApplicationsBoard } from '../features/applications/components/ApplicationsBoard'
 import { ApplicationForm } from '../features/applications/components/ApplicationForm'
@@ -21,7 +23,18 @@ const initialFilters: ApplicationFilters = {
   source: '',
 }
 
+const statusLabels: Record<ApplicationStatus, string> = {
+  saved: 'Saved',
+  applied: 'Applied',
+  test: 'Test',
+  interview: 'Interview',
+  offer: 'Offer',
+  rejected: 'Rejected',
+  withdrawn: 'Withdrawn',
+}
+
 export function ApplicationsPage() {
+  const { showToast } = useToast()
   const {
     applications,
     createApplication,
@@ -37,6 +50,12 @@ export function ApplicationsPage() {
   const [editingApplication, setEditingApplication] =
     useState<Application | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const [applicationToDelete, setApplicationToDelete] =
+    useState<Application | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [pendingStatusIds, setPendingStatusIds] = useState<Set<string>>(
+    () => new Set(),
+  )
 
   const normalizedSearch = filters.search.trim().toLocaleLowerCase()
   const filteredApplications = applications.filter((application) => {
@@ -71,20 +90,20 @@ export function ApplicationsPage() {
     setEditingApplication(null)
   }
 
-  async function handleDelete(application: Application) {
-    const shouldDelete = window.confirm(
-      `Delete the application for ${application.position} at ${application.company}?`,
-    )
-
-    if (!shouldDelete) return
-
+  async function confirmDelete() {
+    if (!applicationToDelete || isDeleting) return
+    const application = applicationToDelete
+    setIsDeleting(true)
     try {
       await deleteApplication(application.id)
+      if (editingApplication?.id === application.id) closeForm()
+      setApplicationToDelete(null)
+      showToast('Application deleted.', 'success')
     } catch {
-      return
+      showToast('Unable to delete the application. Please try again.', 'error')
+    } finally {
+      setIsDeleting(false)
     }
-
-    if (editingApplication?.id === application.id) closeForm()
   }
 
   function handleEdit(application: Application) {
@@ -93,11 +112,24 @@ export function ApplicationsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  function handleStatusChange(
+  async function handleStatusChange(
     application: Application,
     status: ApplicationStatus,
   ) {
-    void changeApplicationStatus(application.id, status).catch(() => undefined)
+    if (pendingStatusIds.has(application.id)) return
+    setPendingStatusIds((current) => new Set(current).add(application.id))
+    try {
+      await changeApplicationStatus(application.id, status)
+      showToast(`Application moved to ${statusLabels[status]}.`, 'success')
+    } catch {
+      showToast('Unable to change the application status. Please try again.', 'error')
+    } finally {
+      setPendingStatusIds((current) => {
+        const next = new Set(current)
+        next.delete(application.id)
+        return next
+      })
+    }
   }
 
   return (
@@ -134,9 +166,24 @@ export function ApplicationsPage() {
             key={editingApplication?.id ?? 'new-application'}
             application={editingApplication ?? undefined}
             onSubmit={async (application) => {
-              if (editingApplication) await updateApplication(application)
-              else await createApplication(application)
-              closeForm()
+              const isEditing = editingApplication !== null
+              try {
+                if (isEditing) await updateApplication(application)
+                else await createApplication(application)
+                closeForm()
+                showToast(
+                  isEditing ? 'Application updated.' : 'Application created.',
+                  'success',
+                )
+              } catch (mutationError) {
+                showToast(
+                  isEditing
+                    ? 'Unable to update the application. Please try again.'
+                    : 'Unable to create the application. Please try again.',
+                  'error',
+                )
+                throw mutationError
+              }
             }}
             onCancel={closeForm}
           />
@@ -195,7 +242,7 @@ export function ApplicationsPage() {
                 key={application.id}
                 application={application}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
+                onDelete={setApplicationToDelete}
               />
             ))}
           </section>
@@ -203,8 +250,9 @@ export function ApplicationsPage() {
           <ApplicationsBoard
             applications={filteredApplications}
             onStatusChange={handleStatusChange}
+            pendingStatusIds={pendingStatusIds}
             onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={setApplicationToDelete}
           />
         )
       ) : (
@@ -212,6 +260,18 @@ export function ApplicationsPage() {
           <h2>No applications found</h2>
           <p>Try changing or clearing your filters.</p>
         </div>
+      )}
+
+      {applicationToDelete && (
+        <ConfirmDialog
+          title={`Delete ${applicationToDelete.position} at ${applicationToDelete.company}?`}
+          description="This application will be permanently removed. This action cannot be undone."
+          confirmLabel="Delete application"
+          destructive
+          isPending={isDeleting}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => setApplicationToDelete(null)}
+        />
       )}
     </main>
   )
