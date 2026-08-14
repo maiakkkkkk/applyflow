@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from '../../i18n/useTranslation'
 
 export interface ConfirmDialogProps {
   title: string
@@ -14,13 +15,14 @@ export interface ConfirmDialogProps {
 export function ConfirmDialog({
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   destructive = false,
   isPending = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation()
   const confirmButtonRef = useRef<HTMLButtonElement>(null)
   const titleId = 'confirm-dialog-title'
   const descriptionId = 'confirm-dialog-description'
@@ -55,7 +57,7 @@ export function ConfirmDialog({
             onClick={onCancel}
             disabled={isPending}
           >
-            {cancelLabel}
+            {cancelLabel ?? t('general.cancel')}
           </button>
           <button
             ref={confirmButtonRef}
@@ -66,7 +68,7 @@ export function ConfirmDialog({
             }}
             disabled={isPending}
           >
-            {isPending ? 'Deleting…' : confirmLabel}
+            {isPending ? t('general.deleting') : (confirmLabel ?? t('general.confirm'))}
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import type {
   WorkMode,
 } from '../types'
 import { AppIcon } from '../../../components/icons/AppIcon'
+import { useTranslation } from '../../../i18n/useTranslation'
 
 export interface ApplicationFilters {
   search: string
@@ -24,23 +25,23 @@ export function ApplicationsFilters({
   onClear,
 }: ApplicationsFiltersProps) {
   const hasActiveFilters = Object.values(filters).some(Boolean)
+  const { t } = useTranslation()
 
   return (
     <div className="filters" aria-label="Application filters">
       <div className="filters__header">
-        <div><AppIcon name="filter" /><span>Filter applications</span></div>
-        {hasActiveFilters && <span className="filters__active">Filters active</span>}
+        <div><AppIcon name="filter" /><span>{t('applications.filter')}</span></div>{hasActiveFilters && <span className="filters__active">{t('applications.filtersActive')}</span>}
       </div>
       <div className="filter-field filter-field--search">
-        <label htmlFor="application-search">Search</label>
+        <label htmlFor="application-search">{t('applications.search')}</label>
         <div className="search-input"><AppIcon name="search" /><input
-            id="application-search" type="search" placeholder="Company, position, or technology"
+            id="application-search" type="search" placeholder={t('applications.searchPlaceholder')}
             value={filters.search} onChange={(event) => onChange({ ...filters, search: event.target.value })}
           /></div>
       </div>
 
       <div className="filter-field">
-        <label htmlFor="status-filter">Status</label>
+        <label htmlFor="status-filter">{t('applications.status')}</label>
         <select
           id="status-filter"
           value={filters.status}
@@ -51,19 +52,13 @@ export function ApplicationsFilters({
             })
           }
         >
-          <option value="">All statuses</option>
-          <option value="saved">Saved</option>
-          <option value="applied">Applied</option>
-          <option value="test">Test</option>
-          <option value="interview">Interview</option>
-          <option value="offer">Offer</option>
-          <option value="rejected">Rejected</option>
-          <option value="withdrawn">Withdrawn</option>
+          <option value="">{t('applications.allStatuses')}</option>
+          {(['saved','applied','test','interview','offer','rejected','withdrawn'] as const).map((status) => <option key={status} value={status}>{t(`status.${status}`)}</option>)}
         </select>
       </div>
 
       <div className="filter-field">
-        <label htmlFor="work-mode-filter">Work mode</label>
+        <label htmlFor="work-mode-filter">{t('applications.workMode')}</label>
         <select
           id="work-mode-filter"
           value={filters.workMode}
@@ -74,15 +69,12 @@ export function ApplicationsFilters({
             })
           }
         >
-          <option value="">All work modes</option>
-          <option value="remote">Remote</option>
-          <option value="hybrid">Hybrid</option>
-          <option value="onsite">On-site</option>
+          <option value="">{t('applications.allWorkModes')}</option>{(['remote','hybrid','onsite'] as const).map((mode) => <option key={mode} value={mode}>{t(`work.${mode}`)}</option>)}
         </select>
       </div>
 
       <div className="filter-field">
-        <label htmlFor="source-filter">Source</label>
+        <label htmlFor="source-filter">{t('applications.source')}</label>
         <select
           id="source-filter"
           value={filters.source}
@@ -93,12 +85,7 @@ export function ApplicationsFilters({
             })
           }
         >
-          <option value="">All sources</option>
-          <option value="linkedin">LinkedIn</option>
-          <option value="gupy">Gupy</option>
-          <option value="company">Company website</option>
-          <option value="referral">Referral</option>
-          <option value="other">Other</option>
+          <option value="">{t('applications.allSources')}</option>{(['linkedin','gupy','company','referral','other'] as const).map((source) => <option key={source} value={source}>{t(`source.${source}`)}</option>)}
         </select>
       </div>
 
@@ -109,7 +96,7 @@ export function ApplicationsFilters({
         disabled={!hasActiveFilters}
       >
         <AppIcon name="close" />
-        Clear filters
+        {t('applications.clear')}
       </button>
     </div>
   )

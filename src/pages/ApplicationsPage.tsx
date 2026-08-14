@@ -14,6 +14,7 @@ import type {
   Application,
   ApplicationStatus,
 } from '../features/applications/types'
+import { useTranslation } from '../i18n/useTranslation'
 
 type ViewMode = 'list' | 'board'
 
@@ -24,17 +25,8 @@ const initialFilters: ApplicationFilters = {
   source: '',
 }
 
-const statusLabels: Record<ApplicationStatus, string> = {
-  saved: 'Saved',
-  applied: 'Applied',
-  test: 'Test',
-  interview: 'Interview',
-  offer: 'Offer',
-  rejected: 'Rejected',
-  withdrawn: 'Withdrawn',
-}
-
 export function ApplicationsPage() {
+  const { t } = useTranslation()
   const { showToast } = useToast()
   const {
     applications,
@@ -82,9 +74,7 @@ export function ApplicationsPage() {
     )
   })
 
-  const resultLabel = `${filteredApplications.length} ${
-    filteredApplications.length === 1 ? 'application' : 'applications'
-  }`
+  const resultLabel = t(filteredApplications.length === 1 ? 'applications.countOne' : 'applications.countMany', { count: filteredApplications.length })
 
   function closeForm() {
     setIsFormOpen(false)
@@ -99,9 +89,9 @@ export function ApplicationsPage() {
       await deleteApplication(application.id)
       if (editingApplication?.id === application.id) closeForm()
       setApplicationToDelete(null)
-      showToast('Application deleted.', 'success')
+      showToast(t('applications.deleted'), 'success')
     } catch {
-      showToast('Unable to delete the application. Please try again.', 'error')
+      showToast(t('applications.deleteFailed'), 'error')
     } finally {
       setIsDeleting(false)
     }
@@ -121,9 +111,9 @@ export function ApplicationsPage() {
     setPendingStatusIds((current) => new Set(current).add(application.id))
     try {
       await changeApplicationStatus(application.id, status)
-      showToast(`Application moved to ${statusLabels[status]}.`, 'success')
+      showToast(t('applications.statusMoved', { status: t(`status.${status}`) }), 'success')
     } catch {
-      showToast('Unable to change the application status. Please try again.', 'error')
+      showToast(t('applications.statusFailed'), 'error')
     } finally {
       setPendingStatusIds((current) => {
         const next = new Set(current)
@@ -138,12 +128,7 @@ export function ApplicationsPage() {
       <header className="page-header applications-header">
         <div className="page-heading-row">
           <div className="page-heading">
-            <p className="eyebrow">Job Application Tracker</p>
-            <h1>Applications</h1>
-            <p className="page-description">
-              Keep track of every opportunity and see where each application
-              stands.
-            </p>
+            <p className="eyebrow">{t('applications.eyebrow')}</p><h1>{t('applications.title')}</h1><p className="page-description">{t('applications.description')}</p>
           </div>
           <button
             className="primary-button add-application-button"
@@ -157,7 +142,7 @@ export function ApplicationsPage() {
             disabled={isFormOpen}
           >
             <AppIcon name="plus" />
-            Add application
+            {t('applications.add')}
           </button>
         </div>
       </header>
@@ -174,14 +159,13 @@ export function ApplicationsPage() {
                 else await createApplication(application)
                 closeForm()
                 showToast(
-                  isEditing ? 'Application updated.' : 'Application created.',
+                  isEditing ? t('applications.updated') : t('applications.created'),
                   'success',
                 )
               } catch (mutationError) {
                 showToast(
                   isEditing
-                    ? 'Unable to update the application. Please try again.'
-                    : 'Unable to create the application. Please try again.',
+                    ? t('applications.updateFailed') : t('applications.createFailed'),
                   'error',
                 )
                 throw mutationError
@@ -205,7 +189,7 @@ export function ApplicationsPage() {
             type="button"
             onClick={() => void reloadApplications().catch(() => undefined)}
           >
-            Try again
+            {t('applications.retry')}
           </button>
         </div>
       )}
@@ -214,14 +198,14 @@ export function ApplicationsPage() {
         <p className="result-count" aria-live="polite">
           {resultLabel}
         </p>
-        <div className="view-toggle" aria-label="Application view">
+        <div className="view-toggle" aria-label={t('applications.view')}>
           <button
             type="button"
             aria-pressed={viewMode === 'list'}
             onClick={() => setViewMode('list')}
           >
             <AppIcon name="list" />
-            List
+            {t('applications.list')}
           </button>
           <button
             type="button"
@@ -229,7 +213,7 @@ export function ApplicationsPage() {
             onClick={() => setViewMode('board')}
           >
             <AppIcon name="board" />
-            Board
+            {t('applications.board')}
           </button>
         </div>
       </div>
@@ -237,11 +221,11 @@ export function ApplicationsPage() {
       {isLoading ? (
         <div className="data-loading workspace-loading" aria-live="polite">
           <span className="dashboard-loading__indicator" aria-hidden="true" />
-          Loading applications…
+          {t('applications.loading')}
         </div>
       ) : filteredApplications.length > 0 ? (
         viewMode === 'list' ? (
-          <section className="applications-grid" aria-label="Job applications">
+          <section className="applications-grid" aria-label={t('applications.region')}>
             {filteredApplications.map((application) => (
               <ApplicationCard
                 key={application.id}
@@ -263,16 +247,14 @@ export function ApplicationsPage() {
       ) : (
         <div className="empty-state">
           <span className="empty-state__icon" aria-hidden="true"><AppIcon name={applications.length === 0 ? 'applications' : 'search'} /></span>
-          <h2>{applications.length === 0 ? 'No applications yet' : 'No applications found'}</h2>
-          <p>{applications.length === 0 ? 'Add your first opportunity to begin tracking your job search.' : 'Try changing or clearing your filters.'}</p>
+          <h2>{t(applications.length === 0 ? 'applications.empty' : 'applications.none')}</h2><p>{t(applications.length === 0 ? 'applications.emptyHelp' : 'applications.noneHelp')}</p>
         </div>
       )}
 
       {applicationToDelete && (
         <ConfirmDialog
-          title={`Delete ${applicationToDelete.position} at ${applicationToDelete.company}?`}
-          description="This application will be permanently removed. This action cannot be undone."
-          confirmLabel="Delete application"
+          title={t('card.deleteTitle', { position: applicationToDelete.position, company: applicationToDelete.company })}
+          description={t('card.deleteDescription')} confirmLabel={t('card.deleteConfirm')}
           destructive
           isPending={isDeleting}
           onConfirm={() => void confirmDelete()}

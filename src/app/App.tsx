@@ -3,6 +3,7 @@ import { ToastProvider } from '../components/feedback/ToastProvider'
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute'
 import { PublicOnlyRoute } from '../features/auth/components/PublicOnlyRoute'
 import { AuthProvider } from '../features/auth/context/AuthContext'
+import { PreferencesProvider } from '../features/preferences/context/PreferencesProvider'
 import { ApplicationsPage } from '../pages/ApplicationsPage'
 import { AuthPage } from '../pages/AuthPage'
 import { DashboardPage } from '../pages/DashboardPage'
@@ -12,7 +13,7 @@ import { AppShell } from './AppShell'
 
 function App() {
   return (
-    <ToastProvider>
+    <PreferencesProvider><ToastProvider>
       <AuthProvider>
         <Routes>
         <Route element={<PublicOnlyRoute />}>
@@ -29,7 +30,7 @@ function App() {
         </Route>
         </Routes>
       </AuthProvider>
-    </ToastProvider>
+    </ToastProvider></PreferencesProvider>
   )
 }
 
