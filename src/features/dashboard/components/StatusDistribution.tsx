@@ -1,5 +1,6 @@
 import type { ApplicationStatus } from '../../applications/types'
 import { applicationStatuses } from '../../applications/utils/applicationAnalytics'
+import { useTranslation } from '../../../i18n/useTranslation'
 
 interface StatusDistributionProps {
   statusCounts: Record<ApplicationStatus, number>
@@ -7,19 +8,20 @@ interface StatusDistributionProps {
 }
 
 export function StatusDistribution({ statusCounts, total }: StatusDistributionProps) {
+  const { t } = useTranslation()
   return (
     <section className="dashboard-panel status-panel" aria-labelledby="distribution-title">
       <header className="dashboard-panel__header">
         <div>
-          <h2 id="distribution-title">Status distribution</h2>
-          <p>See how your applications are moving through the pipeline.</p>
+          <h2 id="distribution-title">{t('dashboard.distribution')}</h2><p>{t('dashboard.distributionHelp')}</p>
         </div>
-        <span className="dashboard-panel__total">{total} total</span>
+        <span className="dashboard-panel__total">{total} {t('dashboard.totalSuffix')}</span>
       </header>
       <ul className="status-distribution">
-        {applicationStatuses.map(({ status, label }) => {
+        {applicationStatuses.map(({ status }) => {
           const count = statusCounts[status]
           const percentage = total ? (count / total) * 100 : 0
+          const label = t(`status.${status}`)
           return (
             <li key={status}>
               <div className="status-distribution__meta">

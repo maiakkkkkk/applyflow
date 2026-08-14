@@ -1,10 +1,13 @@
 import { useState, type FormEvent } from 'react'
 import { BrandLogo } from '../components/brand/BrandLogo'
+import { PreferencesControls } from '../features/preferences/components/PreferencesControls'
+import { useTranslation } from '../i18n/useTranslation'
 import { useAuth } from '../features/auth/context/AuthContext'
 
 type AuthMode = 'sign-in' | 'sign-up'
 
 export function AuthPage() {
+  const { t } = useTranslation()
   const { signIn, signInWithGoogle, signUp } = useAuth()
   const [mode, setMode] = useState<AuthMode>('sign-in')
   const [email, setEmail] = useState('')
@@ -22,7 +25,7 @@ export function AuthPage() {
     setMessage('')
 
     if (!email.trim() || !password) {
-      setError('Email and password are required.')
+      setError(t('auth.required'))
       return
     }
 
@@ -42,7 +45,7 @@ export function AuthPage() {
           setError(signUpError.message)
         } else if (!data.session) {
           setMessage(
-            'Account created. Check your email to confirm your account before signing in.',
+            t('auth.accountCreated'),
           )
         }
       }
@@ -50,7 +53,7 @@ export function AuthPage() {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Authentication could not be completed.',
+          : t('auth.failed'),
       )
     } finally {
       setIsSubmitting(false)
@@ -75,7 +78,7 @@ export function AuthPage() {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Google authentication could not be started.',
+          : t('auth.googleFailed'),
       )
       setIsGoogleSubmitting(false)
     }
@@ -94,24 +97,21 @@ export function AuthPage() {
       <section className="auth-intro" aria-label="About ApplyFlow">
         <div className="auth-intro__content">
           <div className="auth-brand"><BrandLogo /></div>
-          <p className="eyebrow">Your career workspace</p>
-          <h1>Keep every opportunity moving forward.</h1>
-          <p>Organize applications, stay on top of follow-ups, and see your progress clearly—all in one focused workspace.</p>
+          <p className="eyebrow">{t('auth.eyebrow')}</p><h1>{t('auth.hero')}</h1><p>{t('auth.heroText')}</p>
         </div>
       </section>
       <section className="auth-form-area">
+      <div className="auth-preferences"><PreferencesControls /></div>
       <div className="auth-panel" aria-labelledby="auth-title">
-        <p className="eyebrow">Job Application Tracker</p>
-        <h1 id="auth-title">{isSignIn ? 'Sign in' : 'Create an account'}</h1>
+        <p className="eyebrow">{t('auth.tracker')}</p><h1 id="auth-title">{isSignIn ? t('auth.signIn') : t('auth.create')}</h1>
         <p className="page-description">
           {isSignIn
-            ? 'Access your application workspace.'
-            : 'Create an account to start tracking opportunities.'}
+            ? t('auth.access') : t('auth.start')}
         </p>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="form-field">
-            <label htmlFor="auth-email">Email</label>
+            <label htmlFor="auth-email">{t('auth.email')}</label>
             <input
               id="auth-email"
               type="email"
@@ -123,7 +123,7 @@ export function AuthPage() {
             />
           </div>
           <div className="form-field">
-            <label htmlFor="auth-password">Password</label>
+            <label htmlFor="auth-password">{t('auth.password')}</label>
             <input
               id="auth-password"
               type="password"
@@ -152,15 +152,14 @@ export function AuthPage() {
             disabled={isSubmitting || isGoogleSubmitting}
           >
             {isSubmitting
-              ? 'Please wait…'
+              ? t('auth.wait')
               : isSignIn
-                ? 'Sign in'
-                : 'Sign up'}
+                ? t('auth.signIn') : t('auth.signUp')}
           </button>
         </form>
 
         <div className="auth-divider" aria-hidden="true">
-          <span>or</span>
+          <span>{t('auth.or')}</span>
         </div>
 
         <button
@@ -170,17 +169,17 @@ export function AuthPage() {
           disabled={isSubmitting || isGoogleSubmitting}
         >
           <svg className="google-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.32 2.98-7.41Z"/><path fill="#34A853" d="M12 22c2.7 0 4.97-.9 6.62-2.36l-3.24-2.54c-.9.6-2.05.97-3.38.97-2.61 0-4.82-1.76-5.61-4.13H3.04v2.62A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.39 13.94A6.02 6.02 0 0 1 6.07 12c0-.67.12-1.33.32-1.94V7.44H3.04A10 10 0 0 0 2 12c0 1.61.39 3.14 1.04 4.56l3.35-2.62Z"/><path fill="#EA4335" d="M12 5.93c1.47 0 2.79.5 3.83 1.5l2.87-2.87A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.96 5.44l3.35 2.62C7.18 7.69 9.39 5.93 12 5.93Z"/></svg>
-          {isGoogleSubmitting ? 'Connecting to Google…' : 'Continue with Google'}
+          {isGoogleSubmitting ? t('auth.googleConnecting') : t('auth.google')}
         </button>
 
         <p className="auth-switch">
-          {isSignIn ? "Don't have an account?" : 'Already have an account?'}{' '}
+          {isSignIn ? t('auth.noAccount') : t('auth.hasAccount')}{' '}
           <button
             type="button"
             onClick={() => changeMode(isSignIn ? 'sign-up' : 'sign-in')}
             disabled={isSubmitting || isGoogleSubmitting}
           >
-            {isSignIn ? 'Sign up' : 'Sign in'}
+            {isSignIn ? t('auth.signUp') : t('auth.signIn')}
           </button>
         </p>
       </div>

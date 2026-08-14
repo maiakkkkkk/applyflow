@@ -6,6 +6,7 @@ import type {
   EmploymentType,
   WorkMode,
 } from '../types'
+import { useTranslation } from '../../../i18n/useTranslation'
 
 interface ApplicationFormProps {
   application?: Application
@@ -60,6 +61,7 @@ export function ApplicationForm({
   onCancel,
 }: ApplicationFormProps) {
   const isEditing = applicationToEdit !== undefined
+  const { t } = useTranslation()
   const [values, setValues] = useState<FormValues>(() =>
     getInitialValues(applicationToEdit),
   )
@@ -82,10 +84,10 @@ export function ApplicationForm({
     if (isSubmitting) return
 
     const nextErrors: FormErrors = {}
-    if (!values.company.trim()) nextErrors.company = 'Company is required.'
-    if (!values.position.trim()) nextErrors.position = 'Position is required.'
-    if (!values.status) nextErrors.status = 'Status is required.'
-    if (!values.source) nextErrors.source = 'Source is required.'
+    if (!values.company.trim()) nextErrors.company = t('form.companyRequired')
+    if (!values.position.trim()) nextErrors.position = t('form.positionRequired')
+    if (!values.status) nextErrors.status = t('form.statusRequired')
+    if (!values.source) nextErrors.source = t('form.sourceRequired')
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors)
@@ -142,20 +144,19 @@ export function ApplicationForm({
       <div className="application-form-panel__header">
         <div>
           <h2 id="form-title">
-            {isEditing ? 'Edit application' : 'Add application'}
+            {isEditing ? t('form.edit') : t('form.add')}
           </h2>
           <p>
             {isEditing
-              ? 'Update the details for this job application.'
-              : 'Record a new opportunity in your application tracker.'}
+              ? t('form.editHelp') : t('form.addHelp')}
           </p>
         </div>
       </div>
 
       <form className="application-form" onSubmit={handleSubmit} noValidate>
-        <div className="form-section-heading form-field--full"><h3>Opportunity</h3><p>Core details about the role and company.</p></div>
+        <div className="form-section-heading form-field--full"><h3>{t('form.opportunity')}</h3><p>{t('form.opportunityHelp')}</p></div>
         <div className="form-field">
-          <label htmlFor="company">Company *</label>
+          <label htmlFor="company">{t('form.company')} *</label>
           <input
             id="company"
             value={values.company}
@@ -172,7 +173,7 @@ export function ApplicationForm({
         </div>
 
         <div className="form-field">
-          <label htmlFor="position">Position *</label>
+          <label htmlFor="position">{t('form.position')} *</label>
           <input
             id="position"
             value={values.position}
@@ -187,9 +188,9 @@ export function ApplicationForm({
           )}
         </div>
 
-        <div className="form-section-heading form-field--full"><h3>Tracking</h3><p>Where this application currently stands.</p></div>
+        <div className="form-section-heading form-field--full"><h3>{t('form.tracking')}</h3><p>{t('form.trackingHelp')}</p></div>
         <div className="form-field">
-          <label htmlFor="application-status">Status *</label>
+          <label htmlFor="application-status">{t('form.status')} *</label>
           <select
             id="application-status"
             value={values.status}
@@ -202,14 +203,7 @@ export function ApplicationForm({
             aria-invalid={Boolean(errors.status)}
             aria-describedby={errors.status ? 'status-error' : undefined}
           >
-            <option value="">Select status</option>
-            <option value="saved">Saved</option>
-            <option value="applied">Applied</option>
-            <option value="test">Test</option>
-            <option value="interview">Interview</option>
-            <option value="offer">Offer</option>
-            <option value="rejected">Rejected</option>
-            <option value="withdrawn">Withdrawn</option>
+            <option value="">{t('form.selectStatus')}</option>{(['saved','applied','test','interview','offer','rejected','withdrawn'] as const).map((status) => <option key={status} value={status}>{t(`status.${status}`)}</option>)}
           </select>
           {errors.status && (
             <span className="field-error" id="status-error">
@@ -219,7 +213,7 @@ export function ApplicationForm({
         </div>
 
         <div className="form-field">
-          <label htmlFor="application-source">Source *</label>
+          <label htmlFor="application-source">{t('form.source')} *</label>
           <select
             id="application-source"
             value={values.source}
@@ -232,12 +226,7 @@ export function ApplicationForm({
             aria-invalid={Boolean(errors.source)}
             aria-describedby={errors.source ? 'source-error' : undefined}
           >
-            <option value="">Select source</option>
-            <option value="linkedin">LinkedIn</option>
-            <option value="gupy">Gupy</option>
-            <option value="company">Company website</option>
-            <option value="referral">Referral</option>
-            <option value="other">Other</option>
+            <option value="">{t('form.selectSource')}</option>{(['linkedin','gupy','company','referral','other'] as const).map((source) => <option key={source} value={source}>{t(`source.${source}`)}</option>)}
           </select>
           {errors.source && (
             <span className="field-error" id="source-error">
@@ -246,9 +235,9 @@ export function ApplicationForm({
           )}
         </div>
 
-        <div className="form-section-heading form-field--full"><h3>Work details</h3><p>Optional context about the opportunity.</p></div>
+        <div className="form-section-heading form-field--full"><h3>{t('form.work')}</h3><p>{t('form.workHelp')}</p></div>
         <div className="form-field">
-          <label htmlFor="application-work-mode">Work mode</label>
+          <label htmlFor="application-work-mode">{t('form.workMode')}</label>
           <select
             id="application-work-mode"
             value={values.workMode}
@@ -256,15 +245,12 @@ export function ApplicationForm({
               updateValue('workMode', event.target.value as WorkMode | '')
             }
           >
-            <option value="">Not specified</option>
-            <option value="remote">Remote</option>
-            <option value="hybrid">Hybrid</option>
-            <option value="onsite">On-site</option>
+            <option value="">{t('form.notSpecified')}</option>{(['remote','hybrid','onsite'] as const).map((mode) => <option key={mode} value={mode}>{t(`work.${mode}`)}</option>)}
           </select>
         </div>
 
         <div className="form-field">
-          <label htmlFor="employment-type">Employment type</label>
+          <label htmlFor="employment-type">{t('form.employmentType')}</label>
           <select
             id="employment-type"
             value={values.employmentType}
@@ -275,18 +261,13 @@ export function ApplicationForm({
               )
             }
           >
-            <option value="">Not specified</option>
-            <option value="clt">CLT</option>
-            <option value="pj">PJ</option>
-            <option value="internship">Internship</option>
-            <option value="trainee">Trainee</option>
-            <option value="contract">Contract</option>
-            <option value="other">Other</option>
+            <option value="">{t('form.notSpecified')}</option>
+            {(['clt','pj','internship','trainee','contract','other'] as const).map((type) => <option key={type} value={type}>{t(`employment.${type}`)}</option>)}
           </select>
         </div>
 
         <div className="form-field">
-          <label htmlFor="location">Location</label>
+          <label htmlFor="location">{t('form.location')}</label>
           <input
             id="location"
             value={values.location}
@@ -295,7 +276,7 @@ export function ApplicationForm({
         </div>
 
         <div className="form-field">
-          <label htmlFor="job-url">Job URL</label>
+          <label htmlFor="job-url">{t('form.jobUrl')}</label>
           <input
             id="job-url"
             type="url"
@@ -306,7 +287,7 @@ export function ApplicationForm({
         </div>
 
         <div className="form-field">
-          <label htmlFor="next-action-at">Next action date</label>
+          <label htmlFor="next-action-at">{t('form.nextAction')}</label>
           <input
             id="next-action-at"
             type="date"
@@ -317,9 +298,9 @@ export function ApplicationForm({
           />
         </div>
 
-        <div className="form-section-heading form-field--full"><h3>Additional information</h3><p>Useful context for later conversations.</p></div>
+        <div className="form-section-heading form-field--full"><h3>{t('form.additional')}</h3><p>{t('form.additionalHelp')}</p></div>
         <div className="form-field form-field--full">
-          <label htmlFor="technologies">Technologies</label>
+          <label htmlFor="technologies">{t('form.technologies')}</label>
           <input
             id="technologies"
             value={values.technologies}
@@ -330,12 +311,12 @@ export function ApplicationForm({
             aria-describedby="technologies-hint"
           />
           <span className="field-hint" id="technologies-hint">
-            Separate technologies with commas.
+            {t('form.technologiesHint')}
           </span>
         </div>
 
         <div className="form-field form-field--full">
-          <label htmlFor="notes">Notes</label>
+          <label htmlFor="notes">{t('form.notes')}</label>
           <textarea
             id="notes"
             rows={4}
@@ -351,14 +332,13 @@ export function ApplicationForm({
             onClick={onCancel}
             disabled={isSubmitting}
           >
-            Cancel
+            {t('form.cancel')}
           </button>
           <button className="primary-button" type="submit" disabled={isSubmitting}>
             {isSubmitting
-              ? 'Saving…'
+              ? t('form.saving')
               : isEditing
-                ? 'Save changes'
-                : 'Save application'}
+                ? t('form.saveChanges') : t('form.save')}
           </button>
         </div>
       </form>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import type { Application, ApplicationStatus } from '../types'
+import type { Application } from '../types'
 import { AppIcon } from '../../../components/icons/AppIcon'
+import { useTranslation } from '../../../i18n/useTranslation'
 
 interface FollowUpItemProps {
   application: Application & { nextActionAt: string }
@@ -8,19 +9,9 @@ interface FollowUpItemProps {
   onReschedule: (application: Application, nextActionAt: string) => Promise<void>
 }
 
-const statusLabels: Record<ApplicationStatus, string> = {
-  saved: 'Saved',
-  applied: 'Applied',
-  test: 'Test',
-  interview: 'Interview',
-  offer: 'Offer',
-  rejected: 'Rejected',
-  withdrawn: 'Withdrawn',
-}
-
-function formatDate(dateValue: string) {
+function formatDate(dateValue: string, locale: string) {
   const [year, month, day] = dateValue.split('-').map(Number)
-  return new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(
     new Date(year, month - 1, day),
   )
 }
@@ -30,6 +21,7 @@ export function FollowUpItem({
   onComplete,
   onReschedule,
 }: FollowUpItemProps) {
+  const { t, locale } = useTranslation()
   const [nextActionAt, setNextActionAt] = useState(application.nextActionAt)
   const [pendingAction, setPendingAction] = useState<
     'complete' | 'reschedule' | null
@@ -55,11 +47,11 @@ export function FollowUpItem({
         <p>{application.company}</p>
         <div className="follow-up-item__meta">
           <span className={`status-badge status-badge--${application.status}`}>
-            {statusLabels[application.status]}
+            {t(`status.${application.status}`)}
           </span>
           <time dateTime={application.nextActionAt}>
             <AppIcon name="calendar" />
-            {formatDate(application.nextActionAt)}
+            {formatDate(application.nextActionAt, locale)}
           </time>
         </div>
       </div>
@@ -67,7 +59,7 @@ export function FollowUpItem({
       <div className="follow-up-item__actions">
         <div className="follow-up-reschedule">
           <label htmlFor={`follow-up-date-${application.id}`}>
-            Reschedule
+            {t('follow.reschedule')}
           </label>
           <div>
             <input
@@ -91,7 +83,7 @@ export function FollowUpItem({
               }
             >
               <AppIcon name="calendar" />
-              {pendingAction === 'reschedule' ? 'Updating…' : 'Update'}
+              {pendingAction === 'reschedule' ? t('follow.updating') : t('follow.update')}
             </button>
           </div>
         </div>
@@ -104,7 +96,7 @@ export function FollowUpItem({
           }
         >
           <AppIcon name="check" />
-          {pendingAction === 'complete' ? 'Completing…' : 'Mark complete'}
+          {pendingAction === 'complete' ? t('follow.completing') : t('follow.complete')}
         </button>
       </div>
     </article>

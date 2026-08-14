@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import type { Toast } from './ToastContext'
+import { useTranslation } from '../../i18n/useTranslation'
 
 const TOAST_TIMEOUT_MS = 5000
 
@@ -10,6 +11,7 @@ function ToastItem({
   toast: Toast
   onDismiss: (id: string) => void
 }) {
+  const { t } = useTranslation()
   useEffect(() => {
     const timeout = window.setTimeout(
       () => onDismiss(toast.id),
@@ -28,9 +30,9 @@ function ToastItem({
       <button
         type="button"
         onClick={() => onDismiss(toast.id)}
-        aria-label={`Dismiss ${toast.variant} notification`}
+        aria-label={t('general.dismissNotification', { variant: toast.variant })}
       >
-        Dismiss
+        {t('general.dismiss')}
       </button>
     </div>
   )
@@ -43,8 +45,9 @@ export function ToastViewport({
   toasts: Toast[]
   onDismiss: (id: string) => void
 }) {
+  const { t } = useTranslation()
   return (
-    <div className="toast-viewport" aria-label="Notifications">
+    <div className="toast-viewport" aria-label={t('general.notifications')}>
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
       ))}

@@ -1,10 +1,6 @@
-import type {
-  Application,
-  ApplicationSource,
-  ApplicationStatus,
-  WorkMode,
-} from '../types'
+import type { Application } from '../types'
 import { AppIcon } from '../../../components/icons/AppIcon'
+import { useTranslation } from '../../../i18n/useTranslation'
 
 interface ApplicationCardProps {
   application: Application
@@ -12,35 +8,9 @@ interface ApplicationCardProps {
   onDelete: (application: Application) => void
 }
 
-const statusLabels: Record<ApplicationStatus, string> = {
-  saved: 'Saved',
-  applied: 'Applied',
-  test: 'Test',
-  interview: 'Interview',
-  offer: 'Offer',
-  rejected: 'Rejected',
-  withdrawn: 'Withdrawn',
-}
-
-const sourceLabels: Record<ApplicationSource, string> = {
-  linkedin: 'LinkedIn',
-  gupy: 'Gupy',
-  company: 'Company website',
-  referral: 'Referral',
-  other: 'Other',
-}
-
-const workModeLabels: Record<WorkMode, string> = {
-  remote: 'Remote',
-  hybrid: 'Hybrid',
-  onsite: 'On-site',
-}
-
-const employmentTypeLabels = { clt: 'CLT', pj: 'PJ', internship: 'Internship', trainee: 'Trainee', contract: 'Contract', other: 'Other' } as const
-
-function formatDate(value: string) {
+function formatDate(value: string, locale: string) {
   const [year, month, day] = value.split('-').map(Number)
-  return new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date(year, month - 1, day))
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(year, month - 1, day))
 }
 
 export function ApplicationCard({
@@ -48,6 +18,7 @@ export function ApplicationCard({
   onEdit,
   onDelete,
 }: ApplicationCardProps) {
+  const { t, locale } = useTranslation()
   const { company, position, source, status, technologies, workMode } =
     application
 
@@ -59,20 +30,20 @@ export function ApplicationCard({
           <h2>{position}</h2>
         </div>
         <span className={`status-badge status-badge--${status}`}>
-          {statusLabels[status]}
+          {t(`status.${status}`)}
         </span>
       </div>
 
       <div className="application-card__metadata">
         {application.location && <span><AppIcon name="mapPin" />{application.location}</span>}
-        {workMode && <span>{workModeLabels[workMode]}</span>}
-        {application.employmentType && <span>{employmentTypeLabels[application.employmentType]}</span>}
-        <span>{sourceLabels[source]}</span>
+        {workMode && <span>{t(`work.${workMode}`)}</span>}
+        {application.employmentType && <span>{t(`employment.${application.employmentType}`)}</span>}
+        <span>{t(`source.${source}`)}</span>
       </div>
 
       {(application.salaryMin !== undefined || application.salaryMax !== undefined) && (
         <p className="application-card__salary">
-          {application.salaryCurrency ?? 'BRL'} {application.salaryMin?.toLocaleString() ?? '—'} – {application.salaryMax?.toLocaleString() ?? '—'}
+          {application.salaryMin !== undefined ? new Intl.NumberFormat(locale, { style: 'currency', currency: application.salaryCurrency ?? 'BRL', maximumFractionDigits: 0 }).format(application.salaryMin) : '—'} – {application.salaryMax !== undefined ? new Intl.NumberFormat(locale, { style: 'currency', currency: application.salaryCurrency ?? 'BRL', maximumFractionDigits: 0 }).format(application.salaryMax) : '—'}
         </p>
       )}
 
@@ -86,14 +57,14 @@ export function ApplicationCard({
 
       <div className="application-card__actions">
         <div className="application-card__dates">
-          {application.appliedAt && <span><AppIcon name="calendar" />Applied {formatDate(application.appliedAt)}</span>}
-          {application.nextActionAt && <span className="application-card__next-action"><AppIcon name="calendar" />Next action {formatDate(application.nextActionAt)}</span>}
+          {application.appliedAt && <span><AppIcon name="calendar" />{t('card.applied', { date: formatDate(application.appliedAt, locale) })}</span>}
+          {application.nextActionAt && <span className="application-card__next-action"><AppIcon name="calendar" />{t('card.nextAction', { date: formatDate(application.nextActionAt, locale) })}</span>}
         </div>
         <div className="application-card__action-buttons">
-        {application.jobUrl && <a href={application.jobUrl} target="_blank" rel="noreferrer"><AppIcon name="externalLink" />View job</a>}
+        {application.jobUrl && <a href={application.jobUrl} target="_blank" rel="noreferrer"><AppIcon name="externalLink" />{t('card.viewJob')}</a>}
         <button type="button" onClick={() => onEdit(application)}>
           <AppIcon name="edit" />
-          Edit
+          {t('card.edit')}
         </button>
         <button
           className="card-action--delete"
@@ -101,7 +72,7 @@ export function ApplicationCard({
           onClick={() => onDelete(application)}
         >
           <AppIcon name="trash" />
-          Delete
+          {t('card.delete')}
         </button>
         </div>
       </div>

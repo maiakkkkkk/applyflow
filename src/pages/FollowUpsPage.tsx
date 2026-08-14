@@ -7,21 +7,15 @@ import {
   isValidDateOnly,
   type FollowUpGroup,
 } from '../features/applications/utils/followUps'
+import { useTranslation } from '../i18n/useTranslation'
 
 
-const groups: ReadonlyArray<{ key: FollowUpGroup; label: string }> = [
-  { key: 'overdue', label: 'Overdue' },
-  { key: 'today', label: 'Today' },
-  { key: 'upcoming', label: 'Upcoming' },
+const groups: ReadonlyArray<{ key: FollowUpGroup; label: 'follow.overdue' | 'follow.today' | 'follow.upcoming'; help: 'follow.overdueHelp' | 'follow.todayHelp' | 'follow.upcomingHelp' }> = [
+  { key: 'overdue', label: 'follow.overdue', help: 'follow.overdueHelp' }, { key: 'today', label: 'follow.today', help: 'follow.todayHelp' }, { key: 'upcoming', label: 'follow.upcoming', help: 'follow.upcomingHelp' },
 ]
 
-const groupDescriptions: Record<FollowUpGroup, string> = {
-  overdue: 'Actions that have passed their scheduled date.',
-  today: 'Actions scheduled for today.',
-  upcoming: 'Actions planned for the days ahead.',
-}
-
 export function FollowUpsPage() {
+  const { t } = useTranslation()
   const { showToast } = useToast()
   const { applications, updateApplication, isLoading, error } = useApplications()
   const { scheduledApplications, groupedApplications } = groupFollowUps(
@@ -34,9 +28,9 @@ export function FollowUpsPage() {
     delete updatedApplication.nextActionAt
     try {
       await updateApplication(updatedApplication)
-      showToast('Follow-up completed.', 'success')
+      showToast(t('follow.completed'), 'success')
     } catch {
-      showToast('Unable to complete the follow-up. Please try again.', 'error')
+      showToast(t('follow.completeFailed'), 'error')
     }
   }
 
@@ -47,20 +41,16 @@ export function FollowUpsPage() {
     if (!isValidDateOnly(nextActionAt)) return
     try {
       await updateApplication({ ...application, nextActionAt })
-      showToast('Follow-up rescheduled.', 'success')
+      showToast(t('follow.rescheduled'), 'success')
     } catch {
-      showToast('Unable to reschedule the follow-up. Please try again.', 'error')
+      showToast(t('follow.rescheduleFailed'), 'error')
     }
   }
 
   return (
     <main className="follow-ups-page">
       <header className="page-header follow-ups-header">
-        <p className="eyebrow">Next actions</p>
-        <h1>Follow-ups</h1>
-        <p className="page-description">
-          Review overdue actions and plan your next conversations.
-        </p>
+        <p className="eyebrow">{t('follow.eyebrow')}</p><h1>{t('follow.title')}</h1><p className="page-description">{t('follow.description')}</p>
       </header>
 
       {error && (
@@ -72,14 +62,13 @@ export function FollowUpsPage() {
       {isLoading && (
         <div className="data-loading workspace-loading" aria-live="polite">
           <span className="dashboard-loading__indicator" aria-hidden="true" />
-          Loading follow-ups…
+          {t('follow.loading')}
         </div>
       )}
 
       {!isLoading && scheduledApplications.length === 0 && (
         <div className="follow-ups-empty">
-          <h2>No follow-ups scheduled</h2>
-          <p>Add a next action date to an active application to see it here.</p>
+          <h2>{t('follow.empty')}</h2><p>{t('follow.emptyHelp')}</p>
         </div>
       )}
 
@@ -91,7 +80,7 @@ export function FollowUpsPage() {
             aria-labelledby={`follow-up-${group.key}`}
           >
             <header>
-              <div><h2 id={`follow-up-${group.key}`}>{group.label}</h2><p>{groupDescriptions[group.key]}</p></div>
+              <div><h2 id={`follow-up-${group.key}`}>{t(group.label)}</h2><p>{t(group.help)}</p></div>
               <span>{groupedApplications[group.key].length}</span>
             </header>
 
@@ -108,7 +97,7 @@ export function FollowUpsPage() {
               </div>
             ) : (
               <p className="follow-up-group__empty">
-                No {group.label.toLowerCase()} follow-ups.
+                {t('follow.groupEmpty', { group: t(group.label).toLowerCase() })}
               </p>
             )}
           </section>

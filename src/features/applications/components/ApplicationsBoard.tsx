@@ -1,5 +1,6 @@
-import type { Application, ApplicationStatus, WorkMode } from '../types'
+import type { Application, ApplicationStatus } from '../types'
 import { AppIcon } from '../../../components/icons/AppIcon'
+import { useTranslation } from '../../../i18n/useTranslation'
 
 interface ApplicationsBoardProps {
   applications: Application[]
@@ -11,22 +12,9 @@ interface ApplicationsBoardProps {
 
 const columns: ReadonlyArray<{
   status: ApplicationStatus
-  label: string
 }> = [
-  { status: 'saved', label: 'Saved' },
-  { status: 'applied', label: 'Applied' },
-  { status: 'test', label: 'Test' },
-  { status: 'interview', label: 'Interview' },
-  { status: 'offer', label: 'Offer' },
-  { status: 'rejected', label: 'Rejected' },
-  { status: 'withdrawn', label: 'Withdrawn' },
+  { status: 'saved' }, { status: 'applied' }, { status: 'test' }, { status: 'interview' }, { status: 'offer' }, { status: 'rejected' }, { status: 'withdrawn' },
 ]
-
-const workModeLabels: Record<WorkMode, string> = {
-  remote: 'Remote',
-  hybrid: 'Hybrid',
-  onsite: 'On-site',
-}
 
 export function ApplicationsBoard({
   applications,
@@ -35,8 +23,9 @@ export function ApplicationsBoard({
   onEdit,
   onDelete,
 }: ApplicationsBoardProps) {
+  const { t, locale } = useTranslation()
   return (
-    <section className="applications-board" aria-label="Applications board">
+    <section className="applications-board" aria-label={t('applications.boardRegion')}>
       {columns.map((column) => {
         const columnApplications = applications.filter(
           (application) => application.status === column.status,
@@ -49,8 +38,8 @@ export function ApplicationsBoard({
             aria-labelledby={`column-${column.status}`}
           >
             <header className="board-column__header">
-              <h2 id={`column-${column.status}`}>{column.label}</h2>
-              <span aria-label={`${columnApplications.length} applications`}>
+              <h2 id={`column-${column.status}`}>{t(`status.${column.status}`)}</h2>
+              <span aria-label={t(columnApplications.length === 1 ? 'board.countOne' : 'board.countMany', { count: columnApplications.length })}>
                 {columnApplications.length}
               </span>
             </header>
@@ -63,10 +52,10 @@ export function ApplicationsBoard({
 
                   {application.workMode && (
                     <p className="board-card__work-mode">
-                      {workModeLabels[application.workMode]}
+                      {t(`work.${application.workMode}`)}
                     </p>
                   )}
-                  {application.nextActionAt && <p className="board-card__next-action"><AppIcon name="calendar" />{application.nextActionAt}</p>}
+                  {application.nextActionAt && <p className="board-card__next-action"><AppIcon name="calendar" />{new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(`${application.nextActionAt}T00:00:00Z`))}</p>}
                   {application.technologies && application.technologies.length > 0 && (
                     <ul className="board-card__technologies" aria-label="Technologies">
                       {application.technologies.slice(0, 3).map((technology) => <li key={technology}>{technology}</li>)}
@@ -74,7 +63,7 @@ export function ApplicationsBoard({
                   )}
 
                   <label htmlFor={`board-status-${application.id}`}>
-                    Status
+                    {t('applications.status')}
                   </label>
                   <select
                     id={`board-status-${application.id}`}
@@ -92,7 +81,7 @@ export function ApplicationsBoard({
                         key={statusOption.status}
                         value={statusOption.status}
                       >
-                        {statusOption.label}
+                        {t(`status.${statusOption.status}`)}
                       </option>
                     ))}
                   </select>
@@ -100,7 +89,7 @@ export function ApplicationsBoard({
                   <div className="board-card__actions">
                     <button type="button" onClick={() => onEdit(application)}>
                       <AppIcon name="edit" />
-                      Edit
+                      {t('card.edit')}
                     </button>
                     <button
                       className="card-action--delete"
@@ -108,14 +97,14 @@ export function ApplicationsBoard({
                       onClick={() => onDelete(application)}
                     >
                       <AppIcon name="trash" />
-                      Delete
+                      {t('card.delete')}
                     </button>
                   </div>
                 </article>
               ))}
 
               {columnApplications.length === 0 && (
-                <p className="board-column__empty">No applications</p>
+                <p className="board-column__empty">{t('board.noApplications')}</p>
               )}
             </div>
           </section>
