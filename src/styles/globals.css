@@ -1718,3 +1718,40 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .follow-up-reschedule > div { grid-template-columns: 1fr; }
   .follow-up-reschedule button, .follow-up-item__actions > .primary-button { width: 100%; }
 }
+
+/* Final responsive QA fixes */
+.app-sidebar, .mobile-navigation, .sidebar-user, .user-identity, .user-identity > div { min-width: 0; }
+.user-identity__email { max-width: 100%; }
+.application-card__header > div, .board-card, .follow-up-item__details, .follow-up-item__actions { min-width: 0; }
+.application-card__header h2, .application-card__company, .board-card h3, .board-card__company, .follow-up-item h3, .follow-up-item__details > p { overflow-wrap: anywhere; }
+.application-card__header .status-badge { flex-shrink: 0; }
+.applications-board { width: 100%; min-width: 0; }
+.board-column, .board-column__cards { min-width: 0; }
+.board-card select, .follow-up-reschedule input, .form-field input, .form-field select, .form-field textarea, .filter-field input, .filter-field select { min-width: 0; max-width: 100%; }
+.toast-viewport { max-height: calc(100dvh - 2rem); overflow-y: auto; overscroll-behavior: contain; }
+.toast > span { min-width: 0; overflow-wrap: anywhere; }
+.toast button { min-width: 2.75rem; min-height: 2.75rem; flex: none; }
+.confirm-dialog { max-height: calc(100dvh - 2rem); overflow-y: auto; }
+.confirm-dialog h2, .confirm-dialog p { overflow-wrap: anywhere; }
+
+@media (max-width: 700px) {
+  .applications-header .page-heading-row { align-items: stretch; }
+  .form-field input, .form-field select, .form-field textarea, .filter-field input, .filter-field select, .board-card select, .follow-up-reschedule input { font-size: 1rem; }
+  .application-card__action-buttons a, .application-card__action-buttons button, .board-card__actions button { min-height: 2.5rem; padding: .55rem .7rem; }
+  .recent-application__identity strong, .recent-application__identity span { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; }
+  .follow-up-item__actions { width: 100%; }
+  .follow-up-reschedule, .follow-up-reschedule > div, .follow-up-reschedule input { width: 100%; min-width: 0; }
+}
+
+@media (max-width: 380px) {
+  h1 { font-size: 1.9rem; }
+  .mobile-header { padding-inline: .75rem; }
+  .mobile-header .brand-logo__wordmark { font-size: 1rem; }
+  .auth-form-area { padding: .75rem; padding-top: 2.5rem; }
+  .auth-panel { padding: 1.25rem; }
+  .application-card { padding: 1rem; }
+  .application-card__header { align-items: flex-start; flex-direction: column; }
+  .application-card__action-buttons { display: grid; grid-template-columns: repeat(2, 1fr); width: 100%; }
+  .application-card__action-buttons a { grid-column: 1 / -1; }
+  .follow-up-group > header { align-items: flex-start; }
+}
